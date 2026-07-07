@@ -75,7 +75,7 @@
 
   main{
     flex:1;
-    padding: 10px 16px 180px; /* Erhöht auf 180px, damit der FAB nichts verdeckt */
+    padding: 10px 16px 180px; /* Genug Platz nach unten für den FAB */
     position:relative;
     z-index:1;
   }
@@ -322,7 +322,7 @@
   }
   .grade-info{ flex:1; min-width:0; }
   .grade-info .typ{ font-weight:600; font-size:14px; }
-  .grade-info .meta{ font-size:12px; color:var(--ink-soft); margin-top:2px; }
+  .grade-info .meta( font-size:12px; color:var(--ink-soft); margin-top:2px; )
   .grade-del{
     background:none; border:none; color:var(--ink-soft); font-size:16px; padding:4px 8px;
   }
@@ -424,7 +424,7 @@
     display:flex; justify-content:space-between; align-items:center;
   }
   .settings-item .lbl{ font-weight:600; font-size:14px; }
-  .settings-item .del{ background:none; border:none; color:var(--red); font-size:13px; font-weight:600; }
+  .settings-item .del{ background:none; border:none; color: #E57373; font-size:13px; font-weight:600; }
   .add-row{
     display:flex; gap:8px; margin-top:6px;
   }
@@ -469,6 +469,7 @@
 
   <main>
 
+    <!-- DASHBOARD -->
     <section class="view active" id="view-dashboard">
       <div class="score-card">
         <div class="score-badge" id="overallScoreBadge">
@@ -489,6 +490,7 @@
       <div id="subjectList"></div>
     </section>
 
+    <!-- ABITUR BLOCK 1 -->
     <section class="view" id="view-abi">
       <div class="score-card">
         <div class="score-badge" id="abiScoreBadge">
@@ -507,6 +509,7 @@
       <div id="abiHjGroupedList"></div>
     </section>
 
+    <!-- SUBJECT DETAIL -->
     <section class="view" id="view-detail">
       <div class="detail-header">
         <button class="back-btn" onclick="showView('dashboard')">←</button>
@@ -521,6 +524,7 @@
       </div>
     </section>
 
+    <!-- SETTINGS -->
     <section class="view" id="view-settings">
       <div class="section-label">Anzeige-Optionen</div>
       <div class="settings-item">
@@ -540,12 +544,16 @@
         <button class="btn ghost" onclick="importData()" style="width: 100%; text-align: center; border-color: var(--primary); color: var(--primary);">📥 Daten einfügen</button>
       </div>
 
+      <!-- HALBJAHRE VERWALTEN INKL. NEUEM KOPIER-BUTTON -->
       <div class="section-label">Halbjahre verwalten</div>
       <div id="hjList"></div>
       <div class="add-row">
         <input type="text" id="newHjInput" placeholder="z. B. Q12/2" />
         <button onclick="addHalbjahr()">+</button>
       </div>
+      <button class="btn ghost" id="btnCopySubjects" onclick="copySubjectsToAllHj()" style="width: 100%; margin-top: 12px; text-align: center; border-color: var(--primary); color: var(--primary);">
+        🔄 Fächer von dieser Übersicht auf alle HJ übertragen
+      </button>
 
       <div class="section-label">Punktesystem (Bayern, Oberstufe)</div>
       <div class="legend">
@@ -573,6 +581,7 @@
 
 </div>
 
+<!-- ADD SUBJECT SHEET -->
 <div class="overlay" id="overlaySubject">
   <div class="sheet">
     <h3>Neues Fach</h3>
@@ -587,6 +596,7 @@
   </div>
 </div>
 
+<!-- ADD GRADE SHEET -->
 <div class="overlay" id="overlayGrade">
   <div class="sheet">
     <h3 id="gradeSheetTitle">Neue Note</h3>
@@ -617,7 +627,6 @@
 </div>
 
 <script>
-// ---------- Data layer ----------
 const STORAGE_KEY = "punkteschnitt-data-v2";
 
 function loadData(){
@@ -642,7 +651,6 @@ let selectedWeight = 1;
 
 function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
 
-// Fließender HSL-Farbverlauf von 0 (Rot) bis 15 (sehr helles Grün)
 function getPointColor(pts) {
   if (pts === null || isNaN(pts)) return 'var(--ink-soft)';
   const maxHue = 135; 
@@ -657,7 +665,6 @@ function formatScore(val) {
   return data.settings.rounding === "whole" ? Math.round(val).toString() : val.toFixed(1);
 }
 
-// ---------- Halbjahr select ----------
 function renderHjSelect(){
   const sel = document.getElementById("hjSelect");
   sel.innerHTML = "";
@@ -674,7 +681,6 @@ document.getElementById("hjSelect").addEventListener("change", (e)=>{
   renderDashboard();
 });
 
-// ---------- Views ----------
 function showView(name){
   document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
   document.getElementById("view-"+name).classList.add("active");
@@ -698,10 +704,8 @@ function showView(name){
   if(name==="settings") renderSettings();
 }
 
-// ---------- Korrigierte bayerische 1:1 Logik ----------
 function weightedAvg(grades){
   if(!grades.length) return null;
-  
   const smallGrades = grades.filter(g => g.weight === 1);
   const bigGrades = grades.filter(g => g.weight === 2);
   
@@ -721,7 +725,6 @@ function weightedAvg(grades){
 
 function subjectsForHj(hj){ return data.subjects.filter(s=>s.halbjahr===hj); }
 
-// ---------- Dashboard ----------
 function renderDashboard(){
   renderHjSelect();
   const subs = subjectsForHj(data.currentHalbjahr);
@@ -759,7 +762,6 @@ function renderDashboard(){
   
   subs.forEach(s=>{
     const avg = weightedAvg(s.grades);
-    
     let gradesHtml = "";
     if(s.grades.length > 0) {
       const sortedGrades = [...s.grades].sort((a,b)=>a.date - b.date);
@@ -791,7 +793,6 @@ function renderDashboard(){
   });
 }
 
-// ---------- Abitur-View ----------
 function renderAbiturView(){
   const activeSubs = data.subjects.filter(s => !s.excludedFromAbi);
   const activeAverages = activeSubs.map(s => weightedAvg(s.grades)).filter(a => a !== null);
@@ -824,7 +825,6 @@ function renderAbiturView(){
       const item = document.createElement("div");
       item.className = "abi-item" + (s.excludedFromAbi ? " excluded" : "");
       item.onclick = () => toggleAbiExclusion(s.id);
-      
       item.innerHTML = `
         <div>
           <div style="font-weight: 600;">${escapeHtml(s.name)}</div>
@@ -848,7 +848,6 @@ function toggleAbiExclusion(id) {
   }
 }
 
-// ---------- Detailansicht ----------
 function openDetail(id){
   currentSubjectId = id;
   const s = data.subjects.find(x=>x.id===id);
@@ -876,7 +875,6 @@ function renderGradeList(s){
     list.appendChild(header);
     bigGrades.forEach(g => list.appendChild(createGradeItemNode(g)));
   }
-
   if(smallGrades.length > 0) {
     const header = document.createElement("div");
     header.className = "section-label";
@@ -891,7 +889,6 @@ function createGradeItemNode(g) {
   item.className = "grade-item";
   const d = new Date(g.date);
   const c = getPointColor(g.points);
-  
   item.innerHTML = `
     <div class="grade-circle" style="border-color: ${c}; color: ${c};">${g.points}</div>
     <div class="grade-info">
@@ -917,7 +914,6 @@ function deleteGrade(gradeId){
   openDetail(currentSubjectId);
 }
 
-// ---------- Add Grade & Subject ----------
 function openAddGrade(){
   buildPointsGrid();
   setWeight(1);
@@ -983,44 +979,83 @@ function saveSubject(){
   renderDashboard();
 }
 
-// ---------- Backup & Wiederherstellung Funktionen ----------
 function exportData() {
   const rawData = localStorage.getItem(STORAGE_KEY);
   if (!rawData || data.subjects.length === 0) {
-    alert("Du hast noch keine Noten oder Fächer eingetragen, die kopiert werden könnten!");
+    alert("Du hast noch keine Noten oder Fächer eingetragen!");
     return;
   }
   navigator.clipboard.writeText(rawData).then(() => {
-    alert("Erfolgreich kopiert! Dein Noten-Code befindet sich in der Zwischenablage. Du kannst ihn jetzt als Backup sichern.");
+    alert("Erfolgreich kopiert! Dein Noten-Code befindet sich in der Zwischenablage.");
   }).catch(() => {
-    alert("Automatisches Kopieren fehlgeschlagen. Hier ist dein Code zum manuellen Kopieren:\n\n" + rawData);
+    alert("Automatisches Kopieren fehlgeschlagen. Hier dein Code:\n\n" + rawData);
   });
 }
 
 function importData() {
-  const code = prompt("Füge hier den kopierten Backup-Code ein, um deine Daten wiederherzustellen:");
-  if (!code) return; // Abgebrochen
-  
+  const code = prompt("Füge hier den kopierten Backup-Code ein:");
+  if (!code) return;
   try {
     const parsed = JSON.parse(code);
-    if (!parsed.subjects || !parsed.halbjahre) {
-      throw new Error("Falsches Format");
-    }
-    
-    if (confirm("Möchtest du deine aktuellen Daten wirklich mit diesem Backup überschreiben?")) {
+    if (!parsed.subjects || !parsed.halbjahre) throw new Error();
+    if (confirm("Aktuelle Daten wirklich mit diesem Backup überschreiben?")) {
       localStorage.setItem(STORAGE_KEY, code);
-      data = loadData(); // Daten neu einlesen
+      data = loadData();
       renderDashboard();
       alert("Daten erfolgreich wiederhergestellt!");
     }
   } catch (e) {
-    alert("Fehler: Der eingegebene Code ist ungültig oder beschädigt.");
+    alert("Fehler: Der Code ist ungültig.");
   }
 }
 
-// ---------- Settings ----------
+// NEUE LOGIK: Fächer auf alle anderen Halbjahre duplizieren
+function copySubjectsToAllHj() {
+  const currentHj = data.currentHalbjahr;
+  const currentSubs = data.subjects.filter(s => s.halbjahr === currentHj);
+  
+  if (currentSubs.length === 0) {
+    alert(`Im aktuell ausgewählten Halbjahr (${currentHj}) existieren noch keine Fächer, die übertragen werden könnten.`);
+    return;
+  }
+
+  const confirmMsg = `Möchtest du die Fächer aus "${currentHj}" in ALLE anderen Halbjahre kopieren?\n\nBereits existierende Fächer in den Ziel-Halbjahren werden ignoriert (keine Duplikate). Noten werden natürlich NICHT mitkopiert.`;
+  if (!confirm(confirmMsg)) return;
+
+  let addedCount = 0;
+
+  data.halbjahre.forEach(targetHj => {
+    if (targetHj === currentHj) return; // Überspringe das Quell-Halbjahr
+
+    // Fächer holen, die im Ziel-Halbjahr schon existieren (für den Duplikat-Check)
+    const existingNames = data.subjects
+      .filter(s => s.halbjahr === targetHj)
+      .map(s => s.name.toLowerCase().trim());
+
+    currentSubs.forEach(sourceSub => {
+      const cleanName = sourceSub.name.trim();
+      // Falls das Fach im Ziel-Halbjahr noch nicht existiert -> anlegen
+      if (!existingNames.includes(cleanName.toLowerCase())) {
+        data.subjects.push({
+          id: uid(),
+          name: cleanName,
+          halbjahr: targetHj,
+          grades: [],
+          excludedFromAbi: false
+        });
+        addedCount++;
+      }
+    });
+  });
+
+  saveData();
+  alert(`Erfolgreich durchgeführt! Es wurden insgesamt ${addedCount} Fächer in den anderen Halbjahren angelegt.`);
+  renderSettings();
+}
+
 function renderSettings(){
   document.getElementById("settingRoundingSelect").value = data.settings.rounding;
+  document.getElementById("btnCopySubjects").textContent = `🔄 Fächer von "${data.currentHalbjahr}" auf alle HJ übertragen`;
 
   const list = document.getElementById("hjList");
   list.innerHTML = "";
@@ -1032,6 +1067,7 @@ function renderSettings(){
     list.appendChild(row);
   });
 }
+
 function changeRoundingSetting(val) {
   data.settings.rounding = val;
   saveData();
