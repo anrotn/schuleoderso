@@ -20,13 +20,7 @@
     --ink: #FFFFFF;           /* Kristallweiße Schrift */
     --ink-soft: #8A8A93;      /* Dezente graue Nebenschrift */
     --primary: #66BB6A;       /* Das markante, leuchtende Notan-Grün */
-    --primary-dark: #4CAF50;
     --line: #2C2C2E;          /* Dunkle Trennlinien */
-    --red: #E57373;           /* Muted Red für niedrigere Punkte */
-    --red-soft: #2C1A1A;
-    --gold: #FFD54F;
-    --gold-soft: #2C2A1A;
-    --green-soft: #1B2C1C;
     --radius: 14px;
     --shadow: 0 4px 16px rgba(0,0,0,0.4);
   }
@@ -107,13 +101,13 @@
     border: none;
     display: flex; align-items: center; justify-content: center;
     flex-shrink: 0;
-    box-shadow: 0 0 25px rgba(102, 187, 106, 0.5);
+    box-shadow: 0 0 25px rgba(102, 187, 106, 0.3);
+    transition: background 0.3s ease, box-shadow 0.3s ease;
   }
   .score-badge .num{ 
     font-family:'Space Grotesk', sans-serif;
-    font-size: 32px; font-weight: 700; color: #ffffff; line-height: 1; 
+    font-size: 32px; font-weight: 700; color: #141416; line-height: 1; 
   }
-  .score-badge .lbl{ display: none; }
   
   .score-meta{ text-align: center; }
   .score-meta h2{
@@ -127,6 +121,20 @@
     margin: 6px 0 0;
     font-size: 14px;
     color: var(--ink-soft);
+  }
+  
+  .total-score-badge {
+    margin-top: 10px; 
+    font-size: 13px; 
+    color: var(--ink-soft);
+  }
+  .total-score-badge span {
+    color: #141416; 
+    font-weight: 700; 
+    font-family: 'Space Grotesk', sans-serif; 
+    padding: 2px 8px; 
+    border-radius: 6px; 
+    margin-left: 4px;
   }
 
   .section-label{
@@ -162,11 +170,11 @@
   .subject-row .name{ font-weight:600; font-size:16px; letter-spacing: -0.01em; }
   .subject-row .sub{ font-size:13px; color:var(--ink-soft); margin-top:3px; }
   
-  /* Notan-Style Notenliste unter dem Fachnamen */
+  /* Notan-Style Notenliste */
   .mini-grades {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     margin-top: 6px;
     flex-wrap: wrap;
   }
@@ -175,31 +183,45 @@
     font-size: 13px;
     font-weight: 700;
   }
-  .mini-badge.small { color: var(--primary); }
-  .mini-badge.small.low { color: var(--red); }
   .mini-badge.big {
-    background: var(--primary);
-    color: #141416;
     padding: 1px 6px;
     border-radius: 4px;
     font-size: 12px;
   }
-  .mini-badge.big.low { background: var(--red); }
 
   .subject-row .pts{
     font-family:'Space Grotesk', sans-serif;
     font-weight:700;
     font-size:16px;
-    color:#fff;
-    background: var(--primary);
+    color:#141416;
     width: 44px; height: 44px;
     border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 0 15px rgba(102, 187, 106, 0.4);
   }
-  .subject-row.low .pts{ 
-    background: var(--red); 
-    box-shadow: 0 0 15px rgba(229, 115, 115, 0.4);
+
+  /* Abitur Streich-Liste */
+  .abi-item {
+    background: var(--paper-raised);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    transition: all 0.2s ease;
+    border-left: 4px solid transparent;
+  }
+  .abi-item.excluded {
+    opacity: 0.35;
+    text-decoration: line-through;
+    border-left-color: #E57373;
+  }
+  .abi-item .meta-info {
+    font-size: 12px;
+    color: var(--ink-soft);
+    margin-top: 2px;
   }
 
   .empty{
@@ -361,9 +383,7 @@
     color:var(--ink);
   }
   .points-grid button.sel{
-    background:var(--primary);
-    border-color:var(--primary);
-    color:#141416;
+    color:#141416 !important;
   }
   .weight-toggle{ display:flex; gap:8px; }
   .weight-toggle button{
@@ -451,15 +471,14 @@
 
     <section class="view active" id="view-dashboard">
       <div class="score-card">
-        <div class="score-badge">
+        <div class="score-badge" id="overallScoreBadge">
           <div class="num" id="overallScore">–</div>
-          <div class="lbl">Ø PUNKTE</div>
         </div>
         <div class="score-meta">
           <h2 id="hjTitle">Halbjahr</h2>
           <p id="hjSub">Noch keine Fächer angelegt</p>
-          <div id="totalScoreContainer" style="margin-top: 10px; font-size: 13px; color: var(--ink-soft); display: none;">
-            Gesamtschnitt (alle HJ): <span id="totalOverallScore" style="color: var(--primary); font-weight: 700; font-family: 'Space Grotesk', sans-serif; background: var(--paper-raised); padding: 2px 8px; border-radius: 6px; margin-left: 4px; border: 1px solid var(--line);">–</span>
+          <div class="total-score-badge" id="totalScoreContainer" style="display: none;">
+            Gesamtschnitt (alle HJ): <span id="totalOverallScore">–</span>
           </div>
         </div>
       </div>
@@ -469,6 +488,24 @@
         <span style="cursor:pointer; color:var(--primary); font-weight:700; text-transform:none; letter-spacing:normal;" onclick="openAddSubject()">+ Fach</span>
       </div>
       <div id="subjectList"></div>
+    </section>
+
+    <section class="view" id="view-abi">
+      <div class="score-card">
+        <div class="score-badge" id="abiScoreBadge">
+          <div class="num" id="abiOverallScore">–</div>
+        </div>
+        <div class="score-meta">
+          <h2>Abitur-Schnitt</h2>
+          <p id="abiMetaSub">Berechnung aus allen gewerteten Halbjahren</p>
+        </div>
+      </div>
+      
+      <div class="section-label">Kurse streichen / werten</div>
+      <p style="font-size: 13px; color: var(--ink-soft); margin: -4px 0 14px 0; line-height: 1.4;">
+        Tippe auf ein Fach, um es aus der Abiturwertung auszuschließen. Es wird durchgestrichen und nicht mehr mitgezählt.
+      </p>
+      <div id="abiHjGroupedList"></div>
     </section>
 
     <section class="view" id="view-detail">
@@ -486,7 +523,16 @@
     </section>
 
     <section class="view" id="view-settings">
-      <div class="section-label">Halbjahre</div>
+      <div class="section-label">Anzeige-Optionen</div>
+      <div class="settings-item">
+        <span class="lbl">Schnitt runden</span>
+        <select id="settingRoundingSelect" class="hj-select" onchange="changeRoundingSetting(this.value)" style="border-radius: 10px;">
+          <option value="decimal">Dezimalzahl (z.B. 11.3)</option>
+          <option value="whole">Ganzzahl (z.B. 11)</option>
+        </select>
+      </div>
+
+      <div class="section-label">Halbjahre verwalten</div>
       <div id="hjList"></div>
       <div class="add-row">
         <input type="text" id="newHjInput" placeholder="z. B. Q12/2" />
@@ -509,8 +555,11 @@
     <button class="active" data-tab="dashboard" onclick="showView('dashboard')">
       <span class="icon">📊</span> Übersicht
     </button>
+    <button data-tab="abi" onclick="showView('abi')">
+      <span class="icon">🎓</span> Abitur
+    </button>
     <button data-tab="settings" onclick="showView('settings')">
-      <span class="icon">⚙️</span> Halbjahre
+      <span class="icon">⚙️</span> Optionen
     </button>
   </nav>
 
@@ -561,16 +610,20 @@
 
 <script>
 // ---------- Data layer ----------
-const STORAGE_KEY = "punkteschnitt-data-v1";
+const STORAGE_KEY = "punkteschnitt-data-v2";
 
 function loadData(){
   const raw = localStorage.getItem(STORAGE_KEY);
-  if(raw){ try { return JSON.parse(raw); } catch(e){ } }
-  return {
+  let parsed = {
     halbjahre: ["1. Halbjahr","2. Halbjahr","3. Halbjahr","4. Halbjahr"],
     currentHalbjahr: "1. Halbjahr",
-    subjects: []
+    subjects: [],
+    settings: { rounding: "decimal" }
   };
+  if(raw){ try { parsed = JSON.parse(raw); } catch(e){ } }
+  if(!parsed.settings) parsed.settings = { rounding: "decimal" };
+  parsed.subjects.forEach(s => { if(s.excludedFromAbi === undefined) s.excludedFromAbi = false; });
+  return parsed;
 }
 function saveData(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
 
@@ -580,6 +633,22 @@ let selectedPoints = null;
 let selectedWeight = 1;
 
 function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+
+// NEU: Fließender HSL-Farbverlauf von 0 (Rot) bis 15 (sehr helles Grün)
+function getPointColor(pts) {
+  if (pts === null || isNaN(pts)) return 'var(--ink-soft)';
+  const maxHue = 135; // Sehr helles, reines Grün
+  const minHue = 0;   // Rot
+  const hue = (pts / 15) * (maxHue - minHue) + minHue;
+  const lightness = 52 + (pts / 15) * 8; // Zwischen 52% bei Rot und 60% bei Hellgrün
+  return `hsl(${hue}, 85%, ${lightness}%)`;
+}
+
+// Formatierungs-Helper basierend auf Settings
+function formatScore(val) {
+  if (val === null || isNaN(val)) return "–";
+  return data.settings.rounding === "whole" ? Math.round(val).toString() : val.toFixed(1);
+}
 
 // ---------- Halbjahr select ----------
 function renderHjSelect(){
@@ -605,8 +674,9 @@ function showView(name){
   document.querySelectorAll("nav.bottom button").forEach(b=>b.classList.remove("active"));
   const navBtn = document.querySelector(`nav.bottom button[data-tab="${name==='detail'?'dashboard':name}"]`);
   if(navBtn) navBtn.classList.add("active");
-  document.getElementById("fabAdd").style.display = (name==="settings") ? "none" : "flex";
+  document.getElementById("fabAdd").style.display = (name==="settings" || name==="abi") ? "none" : "flex";
   if(name==="dashboard") renderDashboard();
+  if(name==="abi") renderAbiturView();
   if(name==="settings") renderSettings();
 }
 
@@ -632,11 +702,6 @@ function weightedAvg(grades){
 }
 
 function subjectsForHj(hj){ return data.subjects.filter(s=>s.halbjahr===hj); }
-function tierClass(avg){
-  if(avg===null) return "";
-  if(avg < 5) return "low";
-  return "";
-}
 
 // ---------- Dashboard ----------
 function renderDashboard(){
@@ -644,21 +709,26 @@ function renderDashboard(){
   const subs = subjectsForHj(data.currentHalbjahr);
   document.getElementById("hjTitle").textContent = data.currentHalbjahr;
 
-  // Aktuelles Halbjahr berechnen
   const subjectAverages = subs.map(s=>weightedAvg(s.grades)).filter(a=>a!==null);
   const overall = subjectAverages.length ? subjectAverages.reduce((a,b)=>a+b,0)/subjectAverages.length : null;
 
-  document.getElementById("overallScore").textContent = overall!==null ? overall.toFixed(1) : "–";
+  const badge = document.getElementById("overallScoreBadge");
+  document.getElementById("overallScore").textContent = formatScore(overall);
+  badge.style.background = overall !== null ? getPointColor(overall) : "var(--paper-raised)";
+  badge.style.boxShadow = overall !== null ? `0 0 25px ${getPointColor(overall)}50` : "none";
+
   document.getElementById("hjSub").textContent = subs.length ? `${subs.length} Fach${subs.length===1?"":"fächer"}` : "Noch keine Fächer angelegt";
 
-  // NEU: Gesamtschnitt über ALLE Halbjahre berechnen
+  // Gesamtschnitt über ALLE Halbjahre berechnen
   const allSubsAverages = data.subjects.map(s=>weightedAvg(s.grades)).filter(a=>a!==null);
   const totalOverall = allSubsAverages.length ? allSubsAverages.reduce((a,b)=>a+b,0)/allSubsAverages.length : null;
   
   const totalContainer = document.getElementById("totalScoreContainer");
   if(totalOverall !== null) {
     totalContainer.style.display = "block";
-    document.getElementById("totalOverallScore").textContent = totalOverall.toFixed(1);
+    const totalSpan = document.getElementById("totalOverallScore");
+    totalSpan.textContent = formatScore(totalOverall);
+    totalSpan.style.background = getPointColor(totalOverall);
   } else {
     totalContainer.style.display = "none";
   }
@@ -678,11 +748,11 @@ function renderDashboard(){
       const sortedGrades = [...s.grades].sort((a,b)=>a.date - b.date);
       gradesHtml = '<div class="mini-grades">';
       sortedGrades.forEach(g => {
-        const isLow = g.points < 5 ? " low" : "";
+        const c = getPointColor(g.points);
         if(g.weight === 2) {
-          gradesHtml += `<span class="mini-badge big${isLow}">${g.points}</span>`;
+          gradesHtml += `<span class="mini-badge big" style="background: ${c}; color: #141416;">${g.points}</span>`;
         } else {
-          gradesHtml += `<span class="mini-badge small${isLow}">${g.points}</span>`;
+          gradesHtml += `<span class="mini-badge" style="color: ${c};">${g.points}</span>`;
         }
       });
       gradesHtml += '</div>';
@@ -691,17 +761,76 @@ function renderDashboard(){
     }
 
     const row = document.createElement("div");
-    row.className = "subject-row " + tierClass(avg);
+    row.className = "subject-row";
     row.onclick = ()=> openDetail(s.id);
     row.innerHTML = `
       <div>
         <div class="name">${escapeHtml(s.name)}</div>
         ${gradesHtml}
       </div>
-      <div class="pts">${avg!==null ? avg.toFixed(1) : "–"}</div>
+      <div class="pts" style="background: ${avg!==null ? getPointColor(avg) : 'var(--line)'}">${formatScore(avg)}</div>
     `;
     list.appendChild(row);
   });
+}
+
+// ---------- Abitur-View (NEU) ----------
+function renderAbiturView(){
+  // Berechne nur die Fächer, die NICHT gestrichen wurden
+  const activeSubs = data.subjects.filter(s => !s.excludedFromAbi);
+  const activeAverages = activeSubs.map(s => weightedAvg(s.grades)).filter(a => a !== null);
+  const abiOverall = activeAverages.length ? activeAverages.reduce((a,b)=>a+b,0)/activeAverages.length : null;
+
+  const badge = document.getElementById("abiScoreBadge");
+  document.getElementById("abiOverallScore").textContent = formatScore(abiOverall);
+  badge.style.background = abiOverall !== null ? getPointColor(abiOverall) : "var(--paper-raised)";
+  badge.style.boxShadow = abiOverall !== null ? `0 0 25px ${getPointColor(abiOverall)}50` : "none";
+
+  const container = document.getElementById("abiHjGroupedList");
+  container.innerHTML = "";
+
+  if(!data.subjects.length) {
+    container.innerHTML = `<div class="empty"><span class="pen">🎓</span>Trage zuerst Fächer und Noten in der Übersicht ein.</div>`;
+    return;
+  }
+
+  // Gruppiert nach Halbjahr auflisten
+  data.halbjahre.forEach(hj => {
+    const hjSubs = data.subjects.filter(s => s.halbjahr === hj);
+    if(!hjSubs.length) return;
+
+    const label = document.createElement("div");
+    label.className = "section-label";
+    label.innerHTML = `<span>${escapeHtml(hj)}</span>`;
+    container.appendChild(label);
+
+    hjSubs.forEach(s => {
+      const avg = weightedAvg(s.grades);
+      const item = document.createElement("div");
+      item.className = "abi-item" + (s.excludedFromAbi ? " excluded" : "");
+      item.onclick = () => toggleAbiExclusion(s.id);
+      
+      item.innerHTML = `
+        <div>
+          <div style="font-weight: 600;">${escapeHtml(s.name)}</div>
+          <div class="meta-info">${s.grades.length} Leistung(en)</div>
+        </div>
+        <div style="font-family: 'Space Grotesk', sans-serif; font-weight: 700; color: ${avg!==null && !s.excludedFromAbi ? getPointColor(avg) : 'var(--ink-soft)'}">
+          ${avg !== null ? formatScore(avg) + " P." : "–"}
+        </div>
+      `;
+      container.appendChild(item);
+    });
+  });
+}
+
+function toggleAbiExclusion(id) {
+  const s = data.subjects.find(x => x.id === id);
+  if(s) {
+    s.excludedFromAbi = !s.excludedFromAbi;
+    saveData();
+    renderAbiturView();
+  }
 }
 
 // ---------- Detailansicht Untertrennung ----------
@@ -746,10 +875,10 @@ function createGradeItemNode(g) {
   const item = document.createElement("div");
   item.className = "grade-item";
   const d = new Date(g.date);
-  const circleColor = g.points < 5 ? "var(--red)" : "var(--primary)";
+  const c = getPointColor(g.points);
   
   item.innerHTML = `
-    <div class="grade-circle" style="border-color: ${circleColor}; color: ${circleColor};">${g.points}</div>
+    <div class="grade-circle" style="border-color: ${c}; color: ${c};">${g.points}</div>
     <div class="grade-info">
       <div class="typ">${g.note ? escapeHtml(g.note) : (g.weight===2 ? "Klausur" : "Leistungsnachweis")}</div>
       <div class="meta">${d.toLocaleDateString('de-DE')}</div>
@@ -803,10 +932,20 @@ function buildPointsGrid(){
   for(let p=15;p>=0;p--){
     const btn = document.createElement("button");
     btn.type="button"; btn.textContent = p;
+    const c = getPointColor(p);
+    btn.style.borderColor = c;
+    btn.style.color = c;
     btn.onclick = ()=>{
       selectedPoints = p;
-      grid.querySelectorAll("button").forEach(b=>b.classList.remove("sel"));
+      grid.querySelectorAll("button").forEach(b=>{
+        const bp = parseInt(b.textContent);
+        b.classList.remove("sel");
+        b.style.background = "var(--paper)";
+        b.style.color = getPointColor(bp);
+      });
       btn.classList.add("sel");
+      btn.style.background = c;
+      btn.style.color = "#141416";
     };
     grid.appendChild(btn);
   }
@@ -840,7 +979,7 @@ function openAddSubject(){
 function saveSubject(){
   const name = document.getElementById("subjectNameInput").value.trim();
   if(!name){ alert("Bitte einen Fachnamen eingeben."); return; }
-  data.subjects.push({ id: uid(), name, halbjahr: data.currentHalbjahr, grades: [] });
+  data.subjects.push({ id: uid(), name, halbjahr: data.currentHalbjahr, grades: [], excludedFromAbi: false });
   saveData();
   closeOverlay("overlaySubject");
   renderDashboard();
@@ -848,6 +987,8 @@ function saveSubject(){
 
 // ---------- Settings ----------
 function renderSettings(){
+  document.getElementById("settingRoundingSelect").value = data.settings.rounding;
+
   const list = document.getElementById("hjList");
   list.innerHTML = "";
   data.halbjahre.forEach(hj=>{
@@ -857,6 +998,10 @@ function renderSettings(){
       <button class="del" onclick="deleteHalbjahr('${hj.replace(/'/g,"\\'")}')">Entfernen</button>`;
     list.appendChild(row);
   });
+}
+function changeRoundingSetting(val) {
+  data.settings.rounding = val;
+  saveData();
 }
 function addHalbjahr(){
   const input = document.getElementById("newHjInput");
@@ -885,7 +1030,6 @@ document.querySelectorAll(".overlay").forEach(ov=>{
   ov.addEventListener("click", (e)=>{ if(e.target===ov) ov.classList.remove("active"); });
 });
 
-// Helper zum Escapen
 function escapeHtml(str){
   const d = document.createElement("div");
   d.textContent = str;
