@@ -14,26 +14,25 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Source+Sans+3:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 <style>
-  :root{
-    --paper:#141416;
-    --paper-raised:#202024;
-    --ink:#FFFFFF;
-    --ink-soft:#8A8A93;
-    --primary:#66BB6A;
-    --primary-dark:#4CAF50;
-    --line:#2C2C2E;
-    --red:#E57373;
-    --red-soft:#2C1A1A;
-    --gold:#FFD54F;
-    --gold-soft:#2C2A1A;
-    --green-soft:#1B2C1C;
-    --radius:14px;
-    --shadow: 0 2px 10px rgba(27,36,48,0.08);
+ :root {
+    --paper: #141416;         /* Tiefdunkler App-Hintergrund */
+    --paper-raised: #202024;  /* Etwas helleres Grau für Karten & Menüs */
+    --ink: #FFFFFF;           /* Kristallweiße Schrift */
+    --ink-soft: #8A8A93;      /* Dezente graue Nebenschrift */
+    --primary: #66BB6A;       /* Das markante, leuchtende Notan-Grün */
+    --primary-dark: #4CAF50;
+    --line: #2C2C2E;          /* Dunkle Trennlinien */
+    --red: #E57373;           /* Muted Red für niedrigere Punkte */
+    --red-soft: #2C1A1A;
+    --gold: #FFD54F;
+    --gold-soft: #2C2A1A;
+    --green-soft: #1B2C1C;
+    --radius: 14px;
+    --shadow: 0 4px 16px rgba(0,0,0,0.4);
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
-  html,body{margin:0; padding:0; height:100%;}
+  html,body{margin:0; padding:0; height:100%; background: var(--paper);}
   body{
-    background:var(--paper);
     color:var(--ink);
     font-family:'Source Sans 3', sans-serif;
     overscroll-behavior-y: none;
@@ -46,60 +45,43 @@
     display:flex;
     flex-direction:column;
     position:relative;
-    background:
-      repeating-linear-gradient(
-        to bottom,
-        transparent,
-        transparent 27px,
-        var(--line) 27px,
-        var(--line) 28px
-      );
-    background-position: 0 92px;
+    background: var(--paper); /* Linien entfernt für den sauberen Notan-Look */
   }
   header.top{
-    background:var(--primary);
+    background:var(--paper);
     color:#fff;
-    padding: calc(env(safe-area-inset-top) + 18px) 20px 16px;
+    padding: calc(env(safe-area-inset-top) + 18px) 20px 8px;
     position:relative;
     z-index:2;
   }
-  header.top::after{
-    content:"";
-    position:absolute;
-    left:0; right:0; bottom:0;
-    height:4px;
-    background: linear-gradient(90deg, var(--red) 0 8px, transparent 8px);
-    background-size: 16px 4px;
-    opacity:0.35;
-  }
   .brand{
     display:flex;
-    align-items:baseline;
+    align-items:center;
     justify-content:space-between;
     gap:10px;
   }
   .brand h1{
     font-family:'Space Grotesk', sans-serif;
-    font-size:22px;
+    font-size:24px;
     margin:0;
     font-weight:700;
     letter-spacing: -0.01em;
   }
   .hj-select{
-    background:rgba(255,255,255,0.14);
-    border:1px solid rgba(255,255,255,0.35);
+    background:var(--paper-raised);
+    border:1px solid var(--line);
     color:#fff;
     border-radius:20px;
-    padding:6px 12px;
+    padding:6px 14px;
     font-size:13px;
     font-family:'JetBrains Mono', monospace;
     font-weight:500;
   }
-  .hj-select option{ color:var(--ink); }
+  .hj-select option{ color:var(--ink); background: var(--paper-raised); }
 
   main{
     flex:1;
-    padding: 18px 16px 90px;
+    padding: 10px 16px 90px;
     position:relative;
     z-index:1;
   }
@@ -107,37 +89,44 @@
   .view.active{ display:block; }
   @keyframes fade{ from{opacity:0; transform:translateY(4px)} to{opacity:1; transform:none} }
 
-  /* Dashboard */
+  /* Dashboard & Zentraler Notan-Schnitt */
   .score-card{
-    background:var(--paper-raised);
-    border-radius:var(--radius);
-    box-shadow:var(--shadow);
-    padding:20px;
-    display:flex;
-    align-items:center;
-    gap:18px;
-    margin-bottom:18px;
+    background: transparent; /* Transparent wie in Notan */
+    padding: 20px 0 30px;
+    display: flex;
+    flex-direction: column;  /* Badge über dem Text zentrieren */
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 10px;
   }
   .score-badge{
-    width:78px; height:78px;
-    border-radius:50%;
-    border:3px solid var(--red);
-    display:flex; align-items:center; justify-content:center;
-    flex-direction:column;
-    flex-shrink:0;
-    font-family:'JetBrains Mono', monospace;
+    width: 100px; height: 100px;
+    border-radius: 50%;
+    background: var(--primary);
+    border: none;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 0 25px rgba(102, 187, 106, 0.5); /* Der Notan-Leuchteffekt */
   }
-  .score-badge .num{ font-size:26px; font-weight:700; color:var(--red); line-height:1; }
-  .score-badge .lbl{ font-size:9px; color:var(--ink-soft); margin-top:2px; }
-  .score-meta h2{
-    margin:0 0 4px;
+  .score-badge .num{ 
     font-family:'Space Grotesk', sans-serif;
-    font-size:16px;
+    font-size: 32px; font-weight: 700; color: #ffffff; line-height: 1; 
+  }
+  .score-badge .lbl{ display: none; } /* Label ausgeblendet, da Text darunter steht */
+  
+  .score-meta{ text-align: center; }
+  .score-meta h2{
+    margin: 0;
+    font-family:'Space Grotesk', sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
   }
   .score-meta p{
-    margin:0;
-    font-size:13px;
-    color:var(--ink-soft);
+    margin: 6px 0 0;
+    font-size: 14px;
+    color: var(--ink-soft);
   }
 
   .section-label{
@@ -146,7 +135,7 @@
     text-transform:uppercase;
     letter-spacing:0.08em;
     color:var(--ink-soft);
-    margin: 22px 0 10px;
+    margin: 22px 0 14px;
     display:flex;
     align-items:center;
     gap:8px;
@@ -158,32 +147,38 @@
     background:var(--line);
   }
 
+  /* Fächer-Liste im Notan-Style */
   .subject-row{
     background:var(--paper-raised);
     border-radius:var(--radius);
-    box-shadow:var(--shadow);
-    padding:14px 16px;
+    padding:16px 18px;
     display:flex;
     align-items:center;
     justify-content:space-between;
-    margin-bottom:10px;
+    margin-bottom:12px;
     cursor:pointer;
-    border-left: 4px solid var(--primary);
+    border-left: none; /* Linker farbiger Strich entfernt */
+    box-shadow: var(--shadow);
   }
-  .subject-row.low{ border-left-color: var(--red); }
-  .subject-row.high{ border-left-color: var(--gold); }
-  .subject-row .name{ font-weight:600; font-size:15px; }
-  .subject-row .sub{ font-size:12px; color:var(--ink-soft); margin-top:2px; }
+  .subject-row .name{ font-weight:600; font-size:16px; letter-spacing: -0.01em; }
+  .subject-row .sub{ font-size:13px; color:var(--ink-soft); margin-top:3px; }
+  
+  /* Die runden Noten-Kreise rechts */
   .subject-row .pts{
-    font-family:'JetBrains Mono', monospace;
+    font-family:'Space Grotesk', sans-serif;
     font-weight:700;
-    font-size:20px;
-    color:var(--primary);
-    min-width:36px;
-    text-align:right;
+    font-size:16px;
+    color:#fff;
+    background: var(--primary);
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 0 15px rgba(102, 187, 106, 0.4);
   }
-  .subject-row.low .pts{ color:var(--red); }
-  .subject-row.high .pts{ color:var(--gold); }
+  .subject-row.low .pts{ 
+    background: var(--red); 
+    box-shadow: 0 0 15px rgba(229, 115, 115, 0.4);
+  }
 
   .empty{
     text-align:center;
@@ -192,26 +187,28 @@
   }
   .empty .pen{ font-size:34px; display:block; margin-bottom:10px; }
 
+  /* Plus-Button (FAB) modernisiert */
   .fab{
     position:fixed;
     right: max(20px, calc((100vw - 480px)/2 + 20px));
     bottom: 96px;
     width:56px; height:56px;
     border-radius:50%;
-    background:var(--red);
-    color:#fff;
-    border:none;
+    background:var(--paper-raised);
+    color:var(--primary);
+    border: 2px solid var(--primary);
     font-size:28px;
-    box-shadow:0 4px 14px rgba(178,58,46,0.4);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.6);
     display:flex; align-items:center; justify-content:center;
     z-index:10;
   }
   .fab:active{ transform:scale(0.94); }
 
+  /* Dark Navigation */
   nav.bottom{
     position:fixed;
     bottom:0; left:0; right:0;
-    background:var(--paper-raised);
+    background: #141416;
     border-top:1px solid var(--line);
     display:flex;
     max-width:480px;
@@ -223,27 +220,28 @@
     flex:1;
     background:none;
     border:none;
-    padding:10px 4px 8px;
+    padding:12px 4px 10px;
     display:flex;
     flex-direction:column;
     align-items:center;
-    gap:3px;
+    gap:4px;
     color:var(--ink-soft);
     font-family:'Source Sans 3', sans-serif;
     font-size:11px;
   }
-  nav.bottom button .icon{ font-size:20px; }
+  nav.bottom button .icon{ font-size:20px; filter: grayscale(100%); opacity: 0.6; }
   nav.bottom button.active{ color:var(--primary); font-weight:700; }
+  nav.bottom button.active .icon { filter: none; opacity: 1; }
 
-  /* Subject detail */
+  /* Fach-Details */
   .detail-header{
-    display:flex; align-items:center; gap:10px; margin-bottom:6px;
+    display:flex; align-items:center; gap:12px; margin-bottom:12px;
   }
   .back-btn{
     background:var(--paper-raised);
     border:1px solid var(--line);
     border-radius:50%;
-    width:34px; height:34px;
+    width:38px; height:38px;
     display:flex; align-items:center; justify-content:center;
     font-size:16px;
     color:var(--ink);
@@ -251,7 +249,7 @@
   .detail-header h2{
     font-family:'Space Grotesk', sans-serif;
     margin:0;
-    font-size:19px;
+    font-size:22px;
     flex:1;
   }
   .icon-btn{
@@ -262,34 +260,35 @@
     background:var(--paper-raised);
     border-radius:12px;
     box-shadow:var(--shadow);
-    padding:12px 14px;
+    padding:14px 16px;
     display:flex;
     align-items:center;
-    gap:12px;
-    margin-bottom:8px;
+    gap:14px;
+    margin-bottom:10px;
   }
   .grade-circle{
     width:42px; height:42px;
     border-radius:50%;
-    border:2px solid var(--red);
+    background: var(--paper);
+    border:2px solid var(--primary);
     display:flex; align-items:center; justify-content:center;
-    font-family:'JetBrains Mono', monospace;
+    font-family:'Space Grotesk', sans-serif;
     font-weight:700;
-    font-size:15px;
-    color:var(--red);
+    font-size:16px;
+    color:var(--primary);
     flex-shrink:0;
   }
   .grade-info{ flex:1; min-width:0; }
   .grade-info .typ{ font-weight:600; font-size:14px; }
-  .grade-info .meta{ font-size:12px; color:var(--ink-soft); }
+  .grade-info .meta{ font-size:12px; color:var(--ink-soft); margin-top:2px; }
   .grade-del{
     background:none; border:none; color:var(--ink-soft); font-size:16px; padding:4px 8px;
   }
 
-  /* Modal / sheet */
+  /* Modals / Overlays im Dark-Vibe */
   .overlay{
     position:fixed; inset:0;
-    background:rgba(27,36,48,0.45);
+    background:rgba(0,0,0,0.7);
     z-index:30;
     display:none;
     align-items:flex-end;
@@ -303,21 +302,22 @@
     border-radius:20px 20px 0 0;
     padding:22px 20px calc(24px + env(safe-area-inset-bottom));
     animation: up .2s ease;
+    border-top: 1px solid var(--line);
   }
   @keyframes up{ from{ transform:translateY(20px); opacity:0 } to{ transform:none; opacity:1 } }
   .sheet h3{
     font-family:'Space Grotesk', sans-serif;
-    margin:0 0 16px;
-    font-size:18px;
+    margin:0 0 18px;
+    font-size:20px;
   }
-  .field{ margin-bottom:14px; }
+  .field{ margin-bottom:16px; }
   .field label{
-    display:block; font-size:12px; color:var(--ink-soft); margin-bottom:6px;
+    display:block; font-size:11px; color:var(--ink-soft); margin-bottom:6px;
     text-transform:uppercase; letter-spacing:0.05em;
   }
   .field input[type=text], .field select{
     width:100%;
-    padding:11px 12px;
+    padding:12px;
     border:1px solid var(--line);
     border-radius:10px;
     font-size:15px;
@@ -335,7 +335,7 @@
     border-radius:8px;
     border:1px solid var(--line);
     background:var(--paper);
-    font-family:'JetBrains Mono', monospace;
+    font-family:'Space Grotesk', sans-serif;
     font-weight:700;
     font-size:14px;
     color:var(--ink);
@@ -343,12 +343,12 @@
   .points-grid button.sel{
     background:var(--primary);
     border-color:var(--primary);
-    color:#fff;
+    color:#141416;
   }
   .weight-toggle{ display:flex; gap:8px; }
   .weight-toggle button{
     flex:1;
-    padding:10px;
+    padding:11px;
     border-radius:10px;
     border:1px solid var(--line);
     background:var(--paper);
@@ -359,19 +359,19 @@
   .weight-toggle button.sel{
     background:var(--primary);
     border-color:var(--primary);
-    color:#fff;
+    color:#141416;
   }
-  .sheet-actions{ display:flex; gap:10px; margin-top:18px; }
+  .sheet-actions{ display:flex; gap:10px; margin-top:20px; }
   .btn{
     flex:1;
-    padding:13px;
+    padding:14px;
     border-radius:10px;
     border:none;
     font-weight:700;
     font-size:14px;
     font-family:inherit;
   }
-  .btn.primary{ background:var(--primary); color:#fff; }
+  .btn.primary{ background:var(--primary); color:#141416; }
   .btn.ghost{ background:var(--paper); color:var(--ink-soft); border:1px solid var(--line); }
 
   /* Settings */
@@ -395,10 +395,11 @@
     border-radius:10px;
     font-size:14px;
     background:var(--paper-raised);
+    color: var(--ink);
   }
   .add-row button{
     background:var(--primary);
-    color:#fff;
+    color:#141416;
     border:none;
     border-radius:10px;
     padding:0 16px;
