@@ -449,7 +449,6 @@
 
   <main>
 
-    <!-- DASHBOARD -->
     <section class="view active" id="view-dashboard">
       <div class="score-card">
         <div class="score-badge">
@@ -459,6 +458,9 @@
         <div class="score-meta">
           <h2 id="hjTitle">Halbjahr</h2>
           <p id="hjSub">Noch keine Fächer angelegt</p>
+          <div id="totalScoreContainer" style="margin-top: 10px; font-size: 13px; color: var(--ink-soft); display: none;">
+            Gesamtschnitt (alle HJ): <span id="totalOverallScore" style="color: var(--primary); font-weight: 700; font-family: 'Space Grotesk', sans-serif; background: var(--paper-raised); padding: 2px 8px; border-radius: 6px; margin-left: 4px; border: 1px solid var(--line);">–</span>
+          </div>
         </div>
       </div>
 
@@ -469,7 +471,6 @@
       <div id="subjectList"></div>
     </section>
 
-    <!-- SUBJECT DETAIL -->
     <section class="view" id="view-detail">
       <div class="detail-header">
         <button class="back-btn" onclick="showView('dashboard')">←</button>
@@ -484,7 +485,6 @@
       </div>
     </section>
 
-    <!-- SETTINGS -->
     <section class="view" id="view-settings">
       <div class="section-label">Halbjahre</div>
       <div id="hjList"></div>
@@ -516,7 +516,6 @@
 
 </div>
 
-<!-- ADD SUBJECT SHEET -->
 <div class="overlay" id="overlaySubject">
   <div class="sheet">
     <h3>Neues Fach</h3>
@@ -531,7 +530,6 @@
   </div>
 </div>
 
-<!-- ADD GRADE SHEET -->
 <div class="overlay" id="overlayGrade">
   <div class="sheet">
     <h3 id="gradeSheetTitle">Neue Note</h3>
@@ -646,11 +644,24 @@ function renderDashboard(){
   const subs = subjectsForHj(data.currentHalbjahr);
   document.getElementById("hjTitle").textContent = data.currentHalbjahr;
 
+  // Aktuelles Halbjahr berechnen
   const subjectAverages = subs.map(s=>weightedAvg(s.grades)).filter(a=>a!==null);
   const overall = subjectAverages.length ? subjectAverages.reduce((a,b)=>a+b,0)/subjectAverages.length : null;
 
   document.getElementById("overallScore").textContent = overall!==null ? overall.toFixed(1) : "–";
   document.getElementById("hjSub").textContent = subs.length ? `${subs.length} Fach${subs.length===1?"":"fächer"}` : "Noch keine Fächer angelegt";
+
+  // NEU: Gesamtschnitt über ALLE Halbjahre berechnen
+  const allSubsAverages = data.subjects.map(s=>weightedAvg(s.grades)).filter(a=>a!==null);
+  const totalOverall = allSubsAverages.length ? allSubsAverages.reduce((a,b)=>a+b,0)/allSubsAverages.length : null;
+  
+  const totalContainer = document.getElementById("totalScoreContainer");
+  if(totalOverall !== null) {
+    totalContainer.style.display = "block";
+    document.getElementById("totalOverallScore").textContent = totalOverall.toFixed(1);
+  } else {
+    totalContainer.style.display = "none";
+  }
 
   const list = document.getElementById("subjectList");
   list.innerHTML = "";
@@ -874,6 +885,7 @@ document.querySelectorAll(".overlay").forEach(ov=>{
   ov.addEventListener("click", (e)=>{ if(e.target===ov) ov.classList.remove("active"); });
 });
 
+// Helper zum Escapen
 function escapeHtml(str){
   const d = document.createElement("div");
   d.textContent = str;
