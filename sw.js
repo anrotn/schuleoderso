@@ -1,4 +1,4 @@
-const CACHE_NAME = "punkteschnitt-v6";
+const CACHE_NAME = "punkteschnitt-v7";
 const ASSETS = [
   "./",
   "./index.html",
