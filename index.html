@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<meta name="theme-color" content="#2F5D62" />
+<meta name="theme-color" content="#141416" />
 <title>Punkteschnitt – Notenverwaltung</title>
 <link rel="manifest" href="manifest.json" />
 <link rel="icon" href="icon-192.png" />
@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Source+Sans+3:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 <style>
- :root {
+  :root {
     --paper: #141416;         /* Tiefdunkler App-Hintergrund */
     --paper-raised: #202024;  /* Etwas helleres Grau für Karten & Menüs */
     --ink: #FFFFFF;           /* Kristallweiße Schrift */
@@ -45,7 +45,7 @@
     display:flex;
     flex-direction:column;
     position:relative;
-    background: var(--paper); /* Linien entfernt für den sauberen Notan-Look */
+    background: var(--paper);
   }
   header.top{
     background:var(--paper);
@@ -89,12 +89,12 @@
   .view.active{ display:block; }
   @keyframes fade{ from{opacity:0; transform:translateY(4px)} to{opacity:1; transform:none} }
 
-  /* Dashboard & Zentraler Notan-Schnitt */
+  /* Dashboard Schnitt-Anzeige */
   .score-card{
-    background: transparent; /* Transparent wie in Notan */
+    background: transparent;
     padding: 20px 0 30px;
     display: flex;
-    flex-direction: column;  /* Badge über dem Text zentrieren */
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: 16px;
@@ -107,13 +107,13 @@
     border: none;
     display: flex; align-items: center; justify-content: center;
     flex-shrink: 0;
-    box-shadow: 0 0 25px rgba(102, 187, 106, 0.5); /* Der Notan-Leuchteffekt */
+    box-shadow: 0 0 25px rgba(102, 187, 106, 0.5);
   }
   .score-badge .num{ 
     font-family:'Space Grotesk', sans-serif;
     font-size: 32px; font-weight: 700; color: #ffffff; line-height: 1; 
   }
-  .score-badge .lbl{ display: none; } /* Label ausgeblendet, da Text darunter steht */
+  .score-badge .lbl{ display: none; }
   
   .score-meta{ text-align: center; }
   .score-meta h2{
@@ -147,7 +147,7 @@
     background:var(--line);
   }
 
-  /* Fächer-Liste im Notan-Style */
+  /* Fächer-Liste */
   .subject-row{
     background:var(--paper-raised);
     border-radius:var(--radius);
@@ -157,16 +157,16 @@
     justify-content:space-between;
     margin-bottom:12px;
     cursor:pointer;
-    border-left: none; /* Linker farbiger Strich entfernt */
     box-shadow: var(--shadow);
   }
   .subject-row .name{ font-weight:600; font-size:16px; letter-spacing: -0.01em; }
   .subject-row .sub{ font-size:13px; color:var(--ink-soft); margin-top:3px; }
- /* Notan-Style Notenliste unter dem Fachnamen */
+  
+  /* Notan-Style Notenliste unter dem Fachnamen */
   .mini-grades {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     margin-top: 6px;
     flex-wrap: wrap;
   }
@@ -175,14 +175,8 @@
     font-size: 13px;
     font-weight: 700;
   }
-  /* Kleine Leistungsnachweise: Reine Textfarbe */
-  .mini-badge.small {
-    color: var(--primary);
-  }
-  .mini-badge.small.low {
-    color: var(--red);
-  }
-  /* Große Leistungsnachweise (Klausuren): Fester Block wie im Screenshot */
+  .mini-badge.small { color: var(--primary); }
+  .mini-badge.small.low { color: var(--red); }
   .mini-badge.big {
     background: var(--primary);
     color: #141416;
@@ -190,11 +184,8 @@
     border-radius: 4px;
     font-size: 12px;
   }
-  .mini-badge.big.low {
-    background: var(--red);
-  }
-  
-  /* Die runden Noten-Kreise rechts */
+  .mini-badge.big.low { background: var(--red); }
+
   .subject-row .pts{
     font-family:'Space Grotesk', sans-serif;
     font-weight:700;
@@ -218,7 +209,6 @@
   }
   .empty .pen{ font-size:34px; display:block; margin-bottom:10px; }
 
-  /* Plus-Button (FAB) modernisiert */
   .fab{
     position:fixed;
     right: max(20px, calc((100vw - 480px)/2 + 20px));
@@ -235,7 +225,6 @@
   }
   .fab:active{ transform:scale(0.94); }
 
-  /* Dark Navigation */
   nav.bottom{
     position:fixed;
     bottom:0; left:0; right:0;
@@ -264,7 +253,7 @@
   nav.bottom button.active{ color:var(--primary); font-weight:700; }
   nav.bottom button.active .icon { filter: none; opacity: 1; }
 
-  /* Fach-Details */
+  /* Details */
   .detail-header{
     display:flex; align-items:center; gap:12px; margin-bottom:12px;
   }
@@ -316,7 +305,7 @@
     background:none; border:none; color:var(--ink-soft); font-size:16px; padding:4px 8px;
   }
 
-  /* Modals / Overlays im Dark-Vibe */
+  /* Overlays */
   .overlay{
     position:fixed; inset:0;
     background:rgba(0,0,0,0.7);
@@ -504,11 +493,11 @@
         <button onclick="addHalbjahr()">+</button>
       </div>
 
-      <div class="section-label">Punkte­system (Bayern, Oberstufe)</div>
+      <div class="section-label">Punktesystem (Bayern, Oberstufe)</div>
       <div class="legend">
         <b>15–13</b> sehr gut · <b>12–10</b> gut · <b>9–7</b> befriedigend<br/>
         <b>6–4</b> ausreichend · <b>3–1</b> mangelhaft · <b>0</b> ungenügend<br/><br/>
-        Große Leistungserhebungen (Klausuren) zählen standardmäßig <b>doppelt</b>, kleine <b>einfach</b> — beim Eintragen einer Note wählbar.
+        Große Leistungserhebungen (Klausuren) zählen im Verhältnis 1:1 zum Gesamtschnitt der kleinen Leistungsnachweise.
       </div>
     </section>
 
@@ -558,7 +547,7 @@
       <label>Art der Leistung</label>
       <div class="weight-toggle">
         <button type="button" id="wBtnSmall" onclick="setWeight(1)">Klein (×1)</button>
-        <button type="button" id="wBtnBig" onclick="setWeight(2)">Groß (×2)</button>
+        <button type="button" id="wBtnBig" onclick="setWeight(2)">Groß (Klausur ×2)</button>
       </div>
     </div>
     <div class="field">
@@ -578,13 +567,12 @@ const STORAGE_KEY = "punkteschnitt-data-v1";
 
 function loadData(){
   const raw = localStorage.getItem(STORAGE_KEY);
-  if(raw){ try { return JSON.parse(raw); } catch(e){ /* fall through */ } }
-  const initial = {
-    halbjahre: ["Q11/1","Q11/2","Q12/1","Q12/2"],
-    currentHalbjahr: "Q11/1",
+  if(raw){ try { return JSON.parse(raw); } catch(e){ } }
+  return {
+    halbjahre: ["1. Halbjahr","2. Halbjahr","3. Halbjahr","4. Halbjahr"],
+    currentHalbjahr: "1. Halbjahr",
     subjects: []
   };
-  return initial;
 }
 function saveData(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
 
@@ -624,37 +612,31 @@ function showView(name){
   if(name==="settings") renderSettings();
 }
 
-// ---------- Grade math ----------
-function subjectsForHj(hj){
-  return data.subjects.filter(s=>s.halbjahr===hj);
-}
+// ---------- Korrigierte bayerische 1:1 Logik ----------
 function weightedAvg(grades){
   if(!grades.length) return null;
   
   const smallGrades = grades.filter(g => g.weight === 1);
   const bigGrades = grades.filter(g => g.weight === 2);
   
-  // Wenn in beiden Bereichen Noten existieren: 1:1 Verrechnung der Schnitte
   if(smallGrades.length && bigGrades.length) {
     const avgSmall = smallGrades.reduce((a,g)=>a+g.points,0) / smallGrades.length;
     const avgBig = bigGrades.reduce((a,g)=>a+g.points,0) / bigGrades.length;
     return (avgSmall + avgBig) / 2;
   } 
-  // Falls es nur kleine Leistungsnachweise gibt
   else if(smallGrades.length) {
     return smallGrades.reduce((a,g)=>a+g.points,0) / smallGrades.length;
   } 
-  // Falls es nur Klausuren gibt
   else if(bigGrades.length) {
     return bigGrades.reduce((a,g)=>a+g.points,0) / bigGrades.length;
   }
-  
   return null;
 }
+
+function subjectsForHj(hj){ return data.subjects.filter(s=>s.halbjahr===hj); }
 function tierClass(avg){
   if(avg===null) return "";
   if(avg < 5) return "low";
-  if(avg >= 13) return "high";
   return "";
 }
 
@@ -664,29 +646,22 @@ function renderDashboard(){
   const subs = subjectsForHj(data.currentHalbjahr);
   document.getElementById("hjTitle").textContent = data.currentHalbjahr;
 
-  const subjectAverages = subs
-    .map(s=>weightedAvg(s.grades))
-    .filter(a=>a!==null);
-  const overall = subjectAverages.length
-    ? subjectAverages.reduce((a,b)=>a+b,0)/subjectAverages.length
-    : null;
+  const subjectAverages = subs.map(s=>weightedAvg(s.grades)).filter(a=>a!==null);
+  const overall = subjectAverages.length ? subjectAverages.reduce((a,b)=>a+b,0)/subjectAverages.length : null;
 
   document.getElementById("overallScore").textContent = overall!==null ? overall.toFixed(1) : "–";
-  document.getElementById("hjSub").textContent = subs.length
-    ? `${subs.length} Fach${subs.length===1?"":"fächer"} · Ø aus allen Fächern`
-    : "Noch keine Fächer angelegt";
+  document.getElementById("hjSub").textContent = subs.length ? `${subs.length} Fach${subs.length===1?"":"fächer"}` : "Noch keine Fächer angelegt";
 
   const list = document.getElementById("subjectList");
   list.innerHTML = "";
   if(!subs.length){
-    list.innerHTML = `<div class="empty"><span class="pen">✎</span>Noch keine Fächer für dieses Halbjahr.<br/>Tippe unten rechts auf + um eins hinzuzufügen.</div>`;
+    list.innerHTML = `<div class="empty"><span class="pen">✎</span>Keine Fächer vorhanden.<br/>Tippe auf + Fach um eins hinzuzufügen.</div>`;
     return;
   }
   
   subs.forEach(s=>{
     const avg = weightedAvg(s.grades);
     
-    // Generiere die Noten-Reihe unter dem Fachnamen (sortiert nach Datum von alt nach neu)
     let gradesHtml = "";
     if(s.grades.length > 0) {
       const sortedGrades = [...s.grades].sort((a,b)=>a.date - b.date);
@@ -701,7 +676,7 @@ function renderDashboard(){
       });
       gradesHtml += '</div>';
     } else {
-      gradesHtml = `<div class="sub">Noch keine Noten eingetragen</div>`;
+      gradesHtml = `<div class="sub">Noch keine Noten</div>`;
     }
 
     const row = document.createElement("div");
@@ -718,53 +693,17 @@ function renderDashboard(){
   });
 }
 
-  // overall average = mean of subject averages (each subject counts once)
-  const subjectAverages = subs
-    .map(s=>weightedAvg(s.grades))
-    .filter(a=>a!==null);
-  const overall = subjectAverages.length
-    ? subjectAverages.reduce((a,b)=>a+b,0)/subjectAverages.length
-    : null;
-
-  document.getElementById("overallScore").textContent = overall!==null ? overall.toFixed(1) : "–";
-  document.getElementById("hjSub").textContent = subs.length
-    ? `${subs.length} Fach${subs.length===1?"":"fächer"} · Ø aus allen Fächern`
-    : "Noch keine Fächer angelegt";
-
-  const list = document.getElementById("subjectList");
-  list.innerHTML = "";
-  if(!subs.length){
-    list.innerHTML = `<div class="empty"><span class="pen">✎</span>Noch keine Fächer für dieses Halbjahr.<br/>Tippe unten rechts auf + um eins hinzuzufügen.</div>`;
-    return;
-  }
-  subs.forEach(s=>{
-    const avg = weightedAvg(s.grades);
-    const row = document.createElement("div");
-    row.className = "subject-row " + tierClass(avg);
-    row.onclick = ()=> openDetail(s.id);
-    row.innerHTML = `
-      <div>
-        <div class="name">${escapeHtml(s.name)}</div>
-        <div class="sub">${s.grades.length} Note${s.grades.length===1?"":"n"}</div>
-      </div>
-      <div class="pts">${avg!==null ? avg.toFixed(1) : "–"}</div>
-    `;
-    list.appendChild(row);
-  });
-}
-
-// ---------- Subject detail ----------
+// ---------- Detailansicht Untertrennung ----------
 function openDetail(id){
   currentSubjectId = id;
   const s = data.subjects.find(x=>x.id===id);
   document.getElementById("detailName").textContent = s.name;
   const avg = weightedAvg(s.grades);
-  document.getElementById("detailAvg").textContent = avg!==null
-    ? `Schnitt: ${avg.toFixed(2)} Punkte`
-    : "Noch keine Noten";
+  document.getElementById("detailAvg").textContent = avg!==null ? `Schnitt: ${avg.toFixed(2)} Punkte` : "Noch keine Noten";
   renderGradeList(s);
   showView("detail");
 }
+
 function renderGradeList(s){
   const list = document.getElementById("gradeList");
   const empty = document.getElementById("gradeEmpty");
@@ -772,36 +711,26 @@ function renderGradeList(s){
   if(!s.grades.length){ empty.style.display="block"; return; }
   empty.style.display = "none";
 
-  // Aufteilen in Große und Kleine Leistungsnachweise
   const smallGrades = s.grades.filter(g => g.weight === 1).sort((a,b)=>b.date-a.date);
   const bigGrades = s.grades.filter(g => g.weight === 2).sort((a,b)=>b.date-a.date);
 
-  // 1. Block: Große Leistungsnachweise (Klausuren)
   if(bigGrades.length > 0) {
     const header = document.createElement("div");
     header.className = "section-label";
     header.innerHTML = "<span>Große Leistungsnachweise (Klausuren)</span>";
     list.appendChild(header);
-    
-    bigGrades.forEach(g => {
-      list.appendChild(createGradeItemNode(g));
-    });
+    bigGrades.forEach(g => list.appendChild(createGradeItemNode(g)));
   }
 
-  // 2. Block: Kleine Leistungsnachweise
   if(smallGrades.length > 0) {
     const header = document.createElement("div");
     header.className = "section-label";
     header.innerHTML = "<span>Kleine Leistungsnachweise</span>";
     list.appendChild(header);
-    
-    smallGrades.forEach(g => {
-      list.appendChild(createGradeItemNode(g));
-    });
+    smallGrades.forEach(g => list.appendChild(createGradeItemNode(g)));
   }
 }
 
-// Hilfsfunktion zum Erstellen eines Listeneintrags
 function createGradeItemNode(g) {
   const item = document.createElement("div");
   item.className = "grade-item";
@@ -817,8 +746,8 @@ function createGradeItemNode(g) {
     <button class="grade-del" onclick="deleteGrade('${g.id}')">✕</button>
   `;
   return item;
-});
 }
+
 function deleteCurrentSubject(){
   if(!currentSubjectId) return;
   if(!confirm("Dieses Fach inkl. aller Noten löschen?")) return;
@@ -833,7 +762,7 @@ function deleteGrade(gradeId){
   openDetail(currentSubjectId);
 }
 
-// ---------- Add subject ----------
+// ---------- Add Grade & Subject ----------
 function openAddGrade(){
   const inDetail = document.getElementById("view-detail").classList.contains("active");
   buildPointsGrid();
@@ -842,13 +771,9 @@ function openAddGrade(){
 
   if(inDetail){
     document.getElementById("gradeSubjectField").style.display = "none";
-    document.getElementById("gradeSheetTitle").textContent = "Neue Note";
   } else {
     const subs = subjectsForHj(data.currentHalbjahr);
-    if(!subs.length){
-      openAddSubject();
-      return;
-    }
+    if(!subs.length){ openAddSubject(); return; }
     document.getElementById("gradeSubjectField").style.display = "block";
     const sel = document.getElementById("gradeSubjectSelect");
     sel.innerHTML = "";
@@ -857,18 +782,16 @@ function openAddGrade(){
       opt.value = s.id; opt.textContent = s.name;
       sel.appendChild(opt);
     });
-    document.getElementById("gradeSheetTitle").textContent = "Neue Note";
   }
   openOverlay("overlayGrade");
 }
+
 function buildPointsGrid(){
   const grid = document.getElementById("pointsGrid");
-  grid.innerHTML = "";
-  selectedPoints = null;
+  grid.innerHTML = ""; selectedPoints = null;
   for(let p=15;p>=0;p--){
     const btn = document.createElement("button");
-    btn.type="button";
-    btn.textContent = p;
+    btn.type="button"; btn.textContent = p;
     btn.onclick = ()=>{
       selectedPoints = p;
       grid.querySelectorAll("button").forEach(b=>b.classList.remove("sel"));
@@ -912,7 +835,7 @@ function saveSubject(){
   renderDashboard();
 }
 
-// ---------- Settings / Halbjahre ----------
+// ---------- Settings ----------
 function renderSettings(){
   const list = document.getElementById("hjList");
   list.innerHTML = "";
@@ -945,16 +868,11 @@ function deleteHalbjahr(hj){
   renderSettings();
 }
 
-// ---------- Overlay helpers ----------
 function openOverlay(id){ document.getElementById(id).classList.add("active"); }
 function closeOverlay(id){ document.getElementById(id).classList.remove("active"); }
 document.querySelectorAll(".overlay").forEach(ov=>{
   ov.addEventListener("click", (e)=>{ if(e.target===ov) ov.classList.remove("active"); });
 });
-
-// when opening "add" from dashboard with no subject selected in detail view,
-// the FAB should let user add either a subject (via long context) — simplified:
-// FAB always adds a grade; if no subjects exist yet it opens "add subject" first (handled above).
 
 function escapeHtml(str){
   const d = document.createElement("div");
@@ -962,10 +880,8 @@ function escapeHtml(str){
   return d.innerHTML;
 }
 
-// ---------- Init ----------
 renderDashboard();
 
-// ---------- Service worker registration ----------
 if("serviceWorker" in navigator){
   window.addEventListener("load", ()=>{
     navigator.serviceWorker.register("sw.js").catch(()=>{});
