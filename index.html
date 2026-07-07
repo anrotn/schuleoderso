@@ -485,7 +485,6 @@
 
       <div class="section-label">
         <span>Fächer</span>
-        <span style="cursor:pointer; color:var(--primary); font-weight:700; text-transform:none; letter-spacing:normal;" onclick="openAddSubject()">+ Fach</span>
       </div>
       <div id="subjectList"></div>
     </section>
@@ -549,7 +548,7 @@
 
   </main>
 
-  <button class="fab" id="fabAdd" onclick="openAddGrade()">+</button>
+  <button class="fab" id="fabAdd" onclick="openAddSubject()">+</button>
 
   <nav class="bottom">
     <button class="active" data-tab="dashboard" onclick="showView('dashboard')">
@@ -582,7 +581,7 @@
 <div class="overlay" id="overlayGrade">
   <div class="sheet">
     <h3 id="gradeSheetTitle">Neue Note</h3>
-    <div class="field" id="gradeSubjectField">
+    <div class="field" id="gradeSubjectField" style="display:none;">
       <label>Fach</label>
       <select id="gradeSubjectSelect"></select>
     </div>
@@ -634,17 +633,16 @@ let selectedWeight = 1;
 
 function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
 
-// NEU: Fließender HSL-Farbverlauf von 0 (Rot) bis 15 (sehr helles Grün)
+// Fließender HSL-Farbverlauf von 0 (Rot) bis 15 (sehr helles Grün)
 function getPointColor(pts) {
   if (pts === null || isNaN(pts)) return 'var(--ink-soft)';
-  const maxHue = 135; // Sehr helles, reines Grün
-  const minHue = 0;   // Rot
+  const maxHue = 135; 
+  const minHue = 0;   
   const hue = (pts / 15) * (maxHue - minHue) + minHue;
-  const lightness = 52 + (pts / 15) * 8; // Zwischen 52% bei Rot und 60% bei Hellgrün
+  const lightness = 52 + (pts / 15) * 8; 
   return `hsl(${hue}, 85%, ${lightness}%)`;
 }
 
-// Formatierungs-Helper basierend auf Settings
 function formatScore(val) {
   if (val === null || isNaN(val)) return "–";
   return data.settings.rounding === "whole" ? Math.round(val).toString() : val.toFixed(1);
@@ -667,14 +665,26 @@ document.getElementById("hjSelect").addEventListener("change", (e)=>{
   renderDashboard();
 });
 
-// ---------- Views ----------
+// ---------- Views (Jetzt mit smarter FAB-Steuerung) ----------
 function showView(name){
   document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
   document.getElementById("view-"+name).classList.add("active");
   document.querySelectorAll("nav.bottom button").forEach(b=>b.classList.remove("active"));
   const navBtn = document.querySelector(`nav.bottom button[data-tab="${name==='detail'?'dashboard':name}"]`);
   if(navBtn) navBtn.classList.add("active");
-  document.getElementById("fabAdd").style.display = (name==="settings" || name==="abi") ? "none" : "flex";
+  
+  // Funktion des Plus-Buttons an die aktive Ansicht anpassen
+  const fab = document.getElementById("fabAdd");
+  if (name === "dashboard") {
+    fab.style.display = "flex";
+    fab.onclick = openAddSubject; // Dashboard -> Fach hinzufügen
+  } else if (name === "detail") {
+    fab.style.display = "flex";
+    fab.onclick = openAddGrade;   // Fach-Detail -> Note hinzufügen
+  } else {
+    fab.style.display = "none";   // In Abi & Settings ausblenden
+  }
+  
   if(name==="dashboard") renderDashboard();
   if(name==="abi") renderAbiturView();
   if(name==="settings") renderSettings();
@@ -719,7 +729,6 @@ function renderDashboard(){
 
   document.getElementById("hjSub").textContent = subs.length ? `${subs.length} Fach${subs.length===1?"":"fächer"}` : "Noch keine Fächer angelegt";
 
-  // Gesamtschnitt über ALLE Halbjahre berechnen
   const allSubsAverages = data.subjects.map(s=>weightedAvg(s.grades)).filter(a=>a!==null);
   const totalOverall = allSubsAverages.length ? allSubsAverages.reduce((a,b)=>a+b,0)/allSubsAverages.length : null;
   
@@ -736,7 +745,7 @@ function renderDashboard(){
   const list = document.getElementById("subjectList");
   list.innerHTML = "";
   if(!subs.length){
-    list.innerHTML = `<div class="empty"><span class="pen">✎</span>Keine Fächer vorhanden.<br/>Tippe auf + Fach um eins hinzuzufügen.</div>`;
+    list.innerHTML = `<div class="empty"><span class="pen">✎</span>Keine Fächer vorhanden.<br/>Tippe unten rechts auf das + um eins hinzuzufügen.</div>`;
     return;
   }
   
@@ -774,9 +783,8 @@ function renderDashboard(){
   });
 }
 
-// ---------- Abitur-View (NEU) ----------
+// ---------- Abitur-View ----------
 function renderAbiturView(){
-  // Berechne nur die Fächer, die NICHT gestrichen wurden
   const activeSubs = data.subjects.filter(s => !s.excludedFromAbi);
   const activeAverages = activeSubs.map(s => weightedAvg(s.grades)).filter(a => a !== null);
   const abiOverall = activeAverages.length ? activeAverages.reduce((a,b)=>a+b,0)/activeAverages.length : null;
@@ -794,7 +802,6 @@ function renderAbiturView(){
     return;
   }
 
-  // Gruppiert nach Halbjahr auflisten
   data.halbjahre.forEach(hj => {
     const hjSubs = data.subjects.filter(s => s.halbjahr === hj);
     if(!hjSubs.length) return;
@@ -904,25 +911,10 @@ function deleteGrade(gradeId){
 
 // ---------- Add Grade & Subject ----------
 function openAddGrade(){
-  const inDetail = document.getElementById("view-detail").classList.contains("active");
   buildPointsGrid();
   setWeight(1);
   document.getElementById("gradeNoteInput").value = "";
-
-  if(inDetail){
-    document.getElementById("gradeSubjectField").style.display = "none";
-  } else {
-    const subs = subjectsForHj(data.currentHalbjahr);
-    if(!subs.length){ openAddSubject(); return; }
-    document.getElementById("gradeSubjectField").style.display = "block";
-    const sel = document.getElementById("gradeSubjectSelect");
-    sel.innerHTML = "";
-    subs.forEach(s=>{
-      const opt = document.createElement("option");
-      opt.value = s.id; opt.textContent = s.name;
-      sel.appendChild(opt);
-    });
-  }
+  document.getElementById("gradeSubjectField").style.display = "none";
   openOverlay("overlayGrade");
 }
 
@@ -957,9 +949,7 @@ function setWeight(w){
 }
 function saveGrade(){
   if(selectedPoints===null){ alert("Bitte Punktzahl auswählen."); return; }
-  const inDetail = document.getElementById("view-detail").classList.contains("active");
-  const subjectId = inDetail ? currentSubjectId : document.getElementById("gradeSubjectSelect").value;
-  const s = data.subjects.find(x=>x.id===subjectId);
+  const s = data.subjects.find(x=>x.id===currentSubjectId);
   s.grades.push({
     id: uid(),
     points: selectedPoints,
@@ -969,7 +959,7 @@ function saveGrade(){
   });
   saveData();
   closeOverlay("overlayGrade");
-  if(inDetail){ openDetail(subjectId); } else { renderDashboard(); }
+  openDetail(currentSubjectId);
 }
 
 function openAddSubject(){
