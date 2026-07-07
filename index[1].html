@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#2F5D62" />
+<title>Punkteschnitt – Notenverwaltung</title>
+<link rel="manifest" href="manifest.json" />
+<link rel="icon" href="icon-192.png" />
+<link rel="apple-touch-icon" href="icon-192.png" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Source+Sans+3:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EDF1EE;
+    --paper-raised:#FFFFFF;
+    --ink:#1B2430;
+    --ink-soft:#5B6670;
+    --primary:#2F5D62;
+    --primary-dark:#234548;
+    --line:#C7CCC5;
+    --red:#B23A2E;
+    --red-soft:#F3DEDB;
+    --gold:#C9A227;
+    --gold-soft:#F4E9C9;
+    --green-soft:#DCE8DD;
+    --radius:14px;
+    --shadow: 0 2px 10px rgba(27,36,48,0.08);
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
+  html,body{margin:0; padding:0; height:100%;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Source Sans 3', sans-serif;
+    overscroll-behavior-y: none;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .app{
+    max-width:480px;
+    margin:0 auto;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    position:relative;
+    background:
+      repeating-linear-gradient(
+        to bottom,
+        transparent,
+        transparent 27px,
+        var(--line) 27px,
+        var(--line) 28px
+      );
+    background-position: 0 92px;
+  }
+  header.top{
+    background:var(--primary);
+    color:#fff;
+    padding: calc(env(safe-area-inset-top) + 18px) 20px 16px;
+    position:relative;
+    z-index:2;
+  }
+  header.top::after{
+    content:"";
+    position:absolute;
+    left:0; right:0; bottom:0;
+    height:4px;
+    background: linear-gradient(90deg, var(--red) 0 8px, transparent 8px);
+    background-size: 16px 4px;
+    opacity:0.35;
+  }
+  .brand{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    gap:10px;
+  }
+  .brand h1{
+    font-family:'Space Grotesk', sans-serif;
+    font-size:22px;
+    margin:0;
+    font-weight:700;
+    letter-spacing: -0.01em;
+  }
+  .hj-select{
+    background:rgba(255,255,255,0.14);
+    border:1px solid rgba(255,255,255,0.35);
+    color:#fff;
+    border-radius:20px;
+    padding:6px 12px;
+    font-size:13px;
+    font-family:'JetBrains Mono', monospace;
+    font-weight:500;
+  }
+  .hj-select option{ color:var(--ink); }
+
+  main{
+    flex:1;
+    padding: 18px 16px 90px;
+    position:relative;
+    z-index:1;
+  }
+  .view{ display:none; animation: fade .18s ease; }
+  .view.active{ display:block; }
+  @keyframes fade{ from{opacity:0; transform:translateY(4px)} to{opacity:1; transform:none} }
+
+  /* Dashboard */
+  .score-card{
+    background:var(--paper-raised);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:20px;
+    display:flex;
+    align-items:center;
+    gap:18px;
+    margin-bottom:18px;
+  }
+  .score-badge{
+    width:78px; height:78px;
+    border-radius:50%;
+    border:3px solid var(--red);
+    display:flex; align-items:center; justify-content:center;
+    flex-direction:column;
+    flex-shrink:0;
+    font-family:'JetBrains Mono', monospace;
+  }
+  .score-badge .num{ font-size:26px; font-weight:700; color:var(--red); line-height:1; }
+  .score-badge .lbl{ font-size:9px; color:var(--ink-soft); margin-top:2px; }
+  .score-meta h2{
+    margin:0 0 4px;
+    font-family:'Space Grotesk', sans-serif;
+    font-size:16px;
+  }
+  .score-meta p{
+    margin:0;
+    font-size:13px;
+    color:var(--ink-soft);
+  }
+
+  .section-label{
+    font-family:'Space Grotesk', sans-serif;
+    font-size:12px;
+    text-transform:uppercase;
+    letter-spacing:0.08em;
+    color:var(--ink-soft);
+    margin: 22px 0 10px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .section-label::after{
+    content:"";
+    flex:1;
+    height:1px;
+    background:var(--line);
+  }
+
+  .subject-row{
+    background:var(--paper-raised);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:14px 16px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:10px;
+    cursor:pointer;
+    border-left: 4px solid var(--primary);
+  }
+  .subject-row.low{ border-left-color: var(--red); }
+  .subject-row.high{ border-left-color: var(--gold); }
+  .subject-row .name{ font-weight:600; font-size:15px; }
+  .subject-row .sub{ font-size:12px; color:var(--ink-soft); margin-top:2px; }
+  .subject-row .pts{
+    font-family:'JetBrains Mono', monospace;
+    font-weight:700;
+    font-size:20px;
+    color:var(--primary);
+    min-width:36px;
+    text-align:right;
+  }
+  .subject-row.low .pts{ color:var(--red); }
+  .subject-row.high .pts{ color:var(--gold); }
+
+  .empty{
+    text-align:center;
+    padding:40px 20px;
+    color:var(--ink-soft);
+  }
+  .empty .pen{ font-size:34px; display:block; margin-bottom:10px; }
+
+  .fab{
+    position:fixed;
+    right: max(20px, calc((100vw - 480px)/2 + 20px));
+    bottom: 96px;
+    width:56px; height:56px;
+    border-radius:50%;
+    background:var(--red);
+    color:#fff;
+    border:none;
+    font-size:28px;
+    box-shadow:0 4px 14px rgba(178,58,46,0.4);
+    display:flex; align-items:center; justify-content:center;
+    z-index:10;
+  }
+  .fab:active{ transform:scale(0.94); }
+
+  nav.bottom{
+    position:fixed;
+    bottom:0; left:0; right:0;
+    background:var(--paper-raised);
+    border-top:1px solid var(--line);
+    display:flex;
+    max-width:480px;
+    margin:0 auto;
+    padding-bottom: env(safe-area-inset-bottom);
+    z-index:20;
+  }
+  nav.bottom button{
+    flex:1;
+    background:none;
+    border:none;
+    padding:10px 4px 8px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:3px;
+    color:var(--ink-soft);
+    font-family:'Source Sans 3', sans-serif;
+    font-size:11px;
+  }
+  nav.bottom button .icon{ font-size:20px; }
+  nav.bottom button.active{ color:var(--primary); font-weight:700; }
+
+  /* Subject detail */
+  .detail-header{
+    display:flex; align-items:center; gap:10px; margin-bottom:6px;
+  }
+  .back-btn{
+    background:var(--paper-raised);
+    border:1px solid var(--line);
+    border-radius:50%;
+    width:34px; height:34px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:16px;
+    color:var(--ink);
+  }
+  .detail-header h2{
+    font-family:'Space Grotesk', sans-serif;
+    margin:0;
+    font-size:19px;
+    flex:1;
+  }
+  .icon-btn{
+    background:none; border:none; font-size:18px; color:var(--ink-soft);
+  }
+
+  .grade-item{
+    background:var(--paper-raised);
+    border-radius:12px;
+    box-shadow:var(--shadow);
+    padding:12px 14px;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin-bottom:8px;
+  }
+  .grade-circle{
+    width:42px; height:42px;
+    border-radius:50%;
+    border:2px solid var(--red);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'JetBrains Mono', monospace;
+    font-weight:700;
+    font-size:15px;
+    color:var(--red);
+    flex-shrink:0;
+  }
+  .grade-info{ flex:1; min-width:0; }
+  .grade-info .typ{ font-weight:600; font-size:14px; }
+  .grade-info .meta{ font-size:12px; color:var(--ink-soft); }
+  .grade-del{
+    background:none; border:none; color:var(--ink-soft); font-size:16px; padding:4px 8px;
+  }
+
+  /* Modal / sheet */
+  .overlay{
+    position:fixed; inset:0;
+    background:rgba(27,36,48,0.45);
+    z-index:30;
+    display:none;
+    align-items:flex-end;
+    justify-content:center;
+  }
+  .overlay.active{ display:flex; }
+  .sheet{
+    background:var(--paper-raised);
+    width:100%;
+    max-width:480px;
+    border-radius:20px 20px 0 0;
+    padding:22px 20px calc(24px + env(safe-area-inset-bottom));
+    animation: up .2s ease;
+  }
+  @keyframes up{ from{ transform:translateY(20px); opacity:0 } to{ transform:none; opacity:1 } }
+  .sheet h3{
+    font-family:'Space Grotesk', sans-serif;
+    margin:0 0 16px;
+    font-size:18px;
+  }
+  .field{ margin-bottom:14px; }
+  .field label{
+    display:block; font-size:12px; color:var(--ink-soft); margin-bottom:6px;
+    text-transform:uppercase; letter-spacing:0.05em;
+  }
+  .field input[type=text], .field select{
+    width:100%;
+    padding:11px 12px;
+    border:1px solid var(--line);
+    border-radius:10px;
+    font-size:15px;
+    font-family:inherit;
+    background:var(--paper);
+    color:var(--ink);
+  }
+  .points-grid{
+    display:grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap:6px;
+  }
+  .points-grid button{
+    aspect-ratio:1;
+    border-radius:8px;
+    border:1px solid var(--line);
+    background:var(--paper);
+    font-family:'JetBrains Mono', monospace;
+    font-weight:700;
+    font-size:14px;
+    color:var(--ink);
+  }
+  .points-grid button.sel{
+    background:var(--primary);
+    border-color:var(--primary);
+    color:#fff;
+  }
+  .weight-toggle{ display:flex; gap:8px; }
+  .weight-toggle button{
+    flex:1;
+    padding:10px;
+    border-radius:10px;
+    border:1px solid var(--line);
+    background:var(--paper);
+    font-size:13px;
+    font-weight:600;
+    color:var(--ink);
+  }
+  .weight-toggle button.sel{
+    background:var(--primary);
+    border-color:var(--primary);
+    color:#fff;
+  }
+  .sheet-actions{ display:flex; gap:10px; margin-top:18px; }
+  .btn{
+    flex:1;
+    padding:13px;
+    border-radius:10px;
+    border:none;
+    font-weight:700;
+    font-size:14px;
+    font-family:inherit;
+  }
+  .btn.primary{ background:var(--primary); color:#fff; }
+  .btn.ghost{ background:var(--paper); color:var(--ink-soft); border:1px solid var(--line); }
+
+  /* Settings */
+  .settings-item{
+    background:var(--paper-raised);
+    border-radius:12px;
+    box-shadow:var(--shadow);
+    padding:14px 16px;
+    margin-bottom:10px;
+    display:flex; justify-content:space-between; align-items:center;
+  }
+  .settings-item .lbl{ font-weight:600; font-size:14px; }
+  .settings-item .del{ background:none; border:none; color:var(--red); font-size:13px; font-weight:600; }
+  .add-row{
+    display:flex; gap:8px; margin-top:6px;
+  }
+  .add-row input{
+    flex:1;
+    padding:11px 12px;
+    border:1px solid var(--line);
+    border-radius:10px;
+    font-size:14px;
+    background:var(--paper-raised);
+  }
+  .add-row button{
+    background:var(--primary);
+    color:#fff;
+    border:none;
+    border-radius:10px;
+    padding:0 16px;
+    font-weight:700;
+  }
+  .legend{
+    font-size:12px;
+    color:var(--ink-soft);
+    line-height:1.6;
+    background:var(--paper-raised);
+    border-radius:12px;
+    padding:14px 16px;
+    margin-top:8px;
+  }
+  .legend b{ color:var(--ink); }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header class="top">
+    <div class="brand">
+      <h1>Punkteschnitt</h1>
+      <select class="hj-select" id="hjSelect"></select>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- DASHBOARD -->
+    <section class="view active" id="view-dashboard">
+      <div class="score-card">
+        <div class="score-badge">
+          <div class="num" id="overallScore">–</div>
+          <div class="lbl">Ø PUNKTE</div>
+        </div>
+        <div class="score-meta">
+          <h2 id="hjTitle">Halbjahr</h2>
+          <p id="hjSub">Noch keine Fächer angelegt</p>
+        </div>
+      </div>
+
+      <div class="section-label">
+        <span>Fächer</span>
+        <span style="cursor:pointer; color:var(--primary); font-weight:700; text-transform:none; letter-spacing:normal;" onclick="openAddSubject()">+ Fach</span>
+      </div>
+      <div id="subjectList"></div>
+    </section>
+
+    <!-- SUBJECT DETAIL -->
+    <section class="view" id="view-detail">
+      <div class="detail-header">
+        <button class="back-btn" onclick="showView('dashboard')">←</button>
+        <h2 id="detailName">Fach</h2>
+        <button class="icon-btn" onclick="deleteCurrentSubject()">🗑</button>
+      </div>
+      <p id="detailAvg" style="color:var(--ink-soft); font-size:13px; margin:0 0 16px 44px;"></p>
+      <div id="gradeList"></div>
+      <div class="empty" id="gradeEmpty" style="display:none;">
+        <span class="pen">✎</span>
+        Noch keine Noten eingetragen.
+      </div>
+    </section>
+
+    <!-- SETTINGS -->
+    <section class="view" id="view-settings">
+      <div class="section-label">Halbjahre</div>
+      <div id="hjList"></div>
+      <div class="add-row">
+        <input type="text" id="newHjInput" placeholder="z. B. Q12/2" />
+        <button onclick="addHalbjahr()">+</button>
+      </div>
+
+      <div class="section-label">Punkte­system (Bayern, Oberstufe)</div>
+      <div class="legend">
+        <b>15–13</b> sehr gut · <b>12–10</b> gut · <b>9–7</b> befriedigend<br/>
+        <b>6–4</b> ausreichend · <b>3–1</b> mangelhaft · <b>0</b> ungenügend<br/><br/>
+        Große Leistungserhebungen (Klausuren) zählen standardmäßig <b>doppelt</b>, kleine <b>einfach</b> — beim Eintragen einer Note wählbar.
+      </div>
+    </section>
+
+  </main>
+
+  <button class="fab" id="fabAdd" onclick="openAddGrade()">+</button>
+
+  <nav class="bottom">
+    <button class="active" data-tab="dashboard" onclick="showView('dashboard')">
+      <span class="icon">📊</span> Übersicht
+    </button>
+    <button data-tab="settings" onclick="showView('settings')">
+      <span class="icon">⚙️</span> Halbjahre
+    </button>
+  </nav>
+
+</div>
+
+<!-- ADD SUBJECT SHEET -->
+<div class="overlay" id="overlaySubject">
+  <div class="sheet">
+    <h3>Neues Fach</h3>
+    <div class="field">
+      <label>Fachname</label>
+      <input type="text" id="subjectNameInput" placeholder="z. B. Mathematik" />
+    </div>
+    <div class="sheet-actions">
+      <button class="btn ghost" onclick="closeOverlay('overlaySubject')">Abbrechen</button>
+      <button class="btn primary" onclick="saveSubject()">Speichern</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD GRADE SHEET -->
+<div class="overlay" id="overlayGrade">
+  <div class="sheet">
+    <h3 id="gradeSheetTitle">Neue Note</h3>
+    <div class="field" id="gradeSubjectField">
+      <label>Fach</label>
+      <select id="gradeSubjectSelect"></select>
+    </div>
+    <div class="field">
+      <label>Punkte (0–15)</label>
+      <div class="points-grid" id="pointsGrid"></div>
+    </div>
+    <div class="field">
+      <label>Art der Leistung</label>
+      <div class="weight-toggle">
+        <button type="button" id="wBtnSmall" onclick="setWeight(1)">Klein (×1)</button>
+        <button type="button" id="wBtnBig" onclick="setWeight(2)">Groß (×2)</button>
+      </div>
+    </div>
+    <div class="field">
+      <label>Notiz (optional)</label>
+      <input type="text" id="gradeNoteInput" placeholder="z. B. Klausur Nr. 2" />
+    </div>
+    <div class="sheet-actions">
+      <button class="btn ghost" onclick="closeOverlay('overlayGrade')">Abbrechen</button>
+      <button class="btn primary" onclick="saveGrade()">Speichern</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ---------- Data layer ----------
+const STORAGE_KEY = "punkteschnitt-data-v1";
+
+function loadData(){
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if(raw){ try { return JSON.parse(raw); } catch(e){ /* fall through */ } }
+  const initial = {
+    halbjahre: ["Q11/1","Q11/2","Q12/1","Q12/2"],
+    currentHalbjahr: "Q11/1",
+    subjects: []
+  };
+  return initial;
+}
+function saveData(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
+
+let data = loadData();
+let currentSubjectId = null;
+let selectedPoints = null;
+let selectedWeight = 1;
+
+function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+
+// ---------- Halbjahr select ----------
+function renderHjSelect(){
+  const sel = document.getElementById("hjSelect");
+  sel.innerHTML = "";
+  data.halbjahre.forEach(hj=>{
+    const opt = document.createElement("option");
+    opt.value = hj; opt.textContent = hj;
+    if(hj === data.currentHalbjahr) opt.selected = true;
+    sel.appendChild(opt);
+  });
+}
+document.getElementById("hjSelect").addEventListener("change", (e)=>{
+  data.currentHalbjahr = e.target.value;
+  saveData();
+  renderDashboard();
+});
+
+// ---------- Views ----------
+function showView(name){
+  document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
+  document.getElementById("view-"+name).classList.add("active");
+  document.querySelectorAll("nav.bottom button").forEach(b=>b.classList.remove("active"));
+  const navBtn = document.querySelector(`nav.bottom button[data-tab="${name==='detail'?'dashboard':name}"]`);
+  if(navBtn) navBtn.classList.add("active");
+  document.getElementById("fabAdd").style.display = (name==="settings") ? "none" : "flex";
+  if(name==="dashboard") renderDashboard();
+  if(name==="settings") renderSettings();
+}
+
+// ---------- Grade math ----------
+function subjectsForHj(hj){
+  return data.subjects.filter(s=>s.halbjahr===hj);
+}
+function weightedAvg(grades){
+  if(!grades.length) return null;
+  const totalW = grades.reduce((a,g)=>a+g.weight,0);
+  const totalP = grades.reduce((a,g)=>a+g.points*g.weight,0);
+  return totalP/totalW;
+}
+function tierClass(avg){
+  if(avg===null) return "";
+  if(avg < 5) return "low";
+  if(avg >= 13) return "high";
+  return "";
+}
+
+// ---------- Dashboard ----------
+function renderDashboard(){
+  renderHjSelect();
+  const subs = subjectsForHj(data.currentHalbjahr);
+  document.getElementById("hjTitle").textContent = data.currentHalbjahr;
+
+  // overall average = mean of subject averages (each subject counts once)
+  const subjectAverages = subs
+    .map(s=>weightedAvg(s.grades))
+    .filter(a=>a!==null);
+  const overall = subjectAverages.length
+    ? subjectAverages.reduce((a,b)=>a+b,0)/subjectAverages.length
+    : null;
+
+  document.getElementById("overallScore").textContent = overall!==null ? overall.toFixed(1) : "–";
+  document.getElementById("hjSub").textContent = subs.length
+    ? `${subs.length} Fach${subs.length===1?"":"fächer"} · Ø aus allen Fächern`
+    : "Noch keine Fächer angelegt";
+
+  const list = document.getElementById("subjectList");
+  list.innerHTML = "";
+  if(!subs.length){
+    list.innerHTML = `<div class="empty"><span class="pen">✎</span>Noch keine Fächer für dieses Halbjahr.<br/>Tippe unten rechts auf + um eins hinzuzufügen.</div>`;
+    return;
+  }
+  subs.forEach(s=>{
+    const avg = weightedAvg(s.grades);
+    const row = document.createElement("div");
+    row.className = "subject-row " + tierClass(avg);
+    row.onclick = ()=> openDetail(s.id);
+    row.innerHTML = `
+      <div>
+        <div class="name">${escapeHtml(s.name)}</div>
+        <div class="sub">${s.grades.length} Note${s.grades.length===1?"":"n"}</div>
+      </div>
+      <div class="pts">${avg!==null ? avg.toFixed(1) : "–"}</div>
+    `;
+    list.appendChild(row);
+  });
+}
+
+// ---------- Subject detail ----------
+function openDetail(id){
+  currentSubjectId = id;
+  const s = data.subjects.find(x=>x.id===id);
+  document.getElementById("detailName").textContent = s.name;
+  const avg = weightedAvg(s.grades);
+  document.getElementById("detailAvg").textContent = avg!==null
+    ? `Schnitt: ${avg.toFixed(2)} Punkte`
+    : "Noch keine Noten";
+  renderGradeList(s);
+  showView("detail");
+}
+function renderGradeList(s){
+  const list = document.getElementById("gradeList");
+  const empty = document.getElementById("gradeEmpty");
+  list.innerHTML = "";
+  if(!s.grades.length){ empty.style.display="block"; return; }
+  empty.style.display = "none";
+  [...s.grades].sort((a,b)=>b.date-a.date).forEach(g=>{
+    const item = document.createElement("div");
+    item.className = "grade-item";
+    const d = new Date(g.date);
+    item.innerHTML = `
+      <div class="grade-circle">${g.points}</div>
+      <div class="grade-info">
+        <div class="typ">${g.weight===2?"Große Leistungserhebung":"Kleine Leistungserhebung"}${g.note ? " · "+escapeHtml(g.note) : ""}</div>
+        <div class="meta">${d.toLocaleDateString('de-DE')} · Gewichtung ×${g.weight}</div>
+      </div>
+      <button class="grade-del" onclick="deleteGrade('${g.id}')">✕</button>
+    `;
+    list.appendChild(item);
+  });
+}
+function deleteCurrentSubject(){
+  if(!currentSubjectId) return;
+  if(!confirm("Dieses Fach inkl. aller Noten löschen?")) return;
+  data.subjects = data.subjects.filter(s=>s.id!==currentSubjectId);
+  saveData();
+  showView("dashboard");
+}
+function deleteGrade(gradeId){
+  const s = data.subjects.find(x=>x.id===currentSubjectId);
+  s.grades = s.grades.filter(g=>g.id!==gradeId);
+  saveData();
+  openDetail(currentSubjectId);
+}
+
+// ---------- Add subject ----------
+function openAddGrade(){
+  const inDetail = document.getElementById("view-detail").classList.contains("active");
+  buildPointsGrid();
+  setWeight(1);
+  document.getElementById("gradeNoteInput").value = "";
+
+  if(inDetail){
+    document.getElementById("gradeSubjectField").style.display = "none";
+    document.getElementById("gradeSheetTitle").textContent = "Neue Note";
+  } else {
+    const subs = subjectsForHj(data.currentHalbjahr);
+    if(!subs.length){
+      openAddSubject();
+      return;
+    }
+    document.getElementById("gradeSubjectField").style.display = "block";
+    const sel = document.getElementById("gradeSubjectSelect");
+    sel.innerHTML = "";
+    subs.forEach(s=>{
+      const opt = document.createElement("option");
+      opt.value = s.id; opt.textContent = s.name;
+      sel.appendChild(opt);
+    });
+    document.getElementById("gradeSheetTitle").textContent = "Neue Note";
+  }
+  openOverlay("overlayGrade");
+}
+function buildPointsGrid(){
+  const grid = document.getElementById("pointsGrid");
+  grid.innerHTML = "";
+  selectedPoints = null;
+  for(let p=15;p>=0;p--){
+    const btn = document.createElement("button");
+    btn.type="button";
+    btn.textContent = p;
+    btn.onclick = ()=>{
+      selectedPoints = p;
+      grid.querySelectorAll("button").forEach(b=>b.classList.remove("sel"));
+      btn.classList.add("sel");
+    };
+    grid.appendChild(btn);
+  }
+}
+function setWeight(w){
+  selectedWeight = w;
+  document.getElementById("wBtnSmall").classList.toggle("sel", w===1);
+  document.getElementById("wBtnBig").classList.toggle("sel", w===2);
+}
+function saveGrade(){
+  if(selectedPoints===null){ alert("Bitte Punktzahl auswählen."); return; }
+  const inDetail = document.getElementById("view-detail").classList.contains("active");
+  const subjectId = inDetail ? currentSubjectId : document.getElementById("gradeSubjectSelect").value;
+  const s = data.subjects.find(x=>x.id===subjectId);
+  s.grades.push({
+    id: uid(),
+    points: selectedPoints,
+    weight: selectedWeight,
+    note: document.getElementById("gradeNoteInput").value.trim(),
+    date: Date.now()
+  });
+  saveData();
+  closeOverlay("overlayGrade");
+  if(inDetail){ openDetail(subjectId); } else { renderDashboard(); }
+}
+
+function openAddSubject(){
+  document.getElementById("subjectNameInput").value = "";
+  openOverlay("overlaySubject");
+}
+function saveSubject(){
+  const name = document.getElementById("subjectNameInput").value.trim();
+  if(!name){ alert("Bitte einen Fachnamen eingeben."); return; }
+  data.subjects.push({ id: uid(), name, halbjahr: data.currentHalbjahr, grades: [] });
+  saveData();
+  closeOverlay("overlaySubject");
+  renderDashboard();
+}
+
+// ---------- Settings / Halbjahre ----------
+function renderSettings(){
+  const list = document.getElementById("hjList");
+  list.innerHTML = "";
+  data.halbjahre.forEach(hj=>{
+    const row = document.createElement("div");
+    row.className = "settings-item";
+    row.innerHTML = `<span class="lbl">${escapeHtml(hj)}</span>
+      <button class="del" onclick="deleteHalbjahr('${hj.replace(/'/g,"\\'")}')">Entfernen</button>`;
+    list.appendChild(row);
+  });
+}
+function addHalbjahr(){
+  const input = document.getElementById("newHjInput");
+  const val = input.value.trim();
+  if(!val) return;
+  if(data.halbjahre.includes(val)){ input.value=""; return; }
+  data.halbjahre.push(val);
+  data.currentHalbjahr = val;
+  saveData();
+  input.value = "";
+  renderSettings();
+}
+function deleteHalbjahr(hj){
+  if(data.halbjahre.length<=1){ alert("Mindestens ein Halbjahr muss bestehen bleiben."); return; }
+  if(!confirm(`"${hj}" und alle zugehörigen Fächer/Noten löschen?`)) return;
+  data.halbjahre = data.halbjahre.filter(h=>h!==hj);
+  data.subjects = data.subjects.filter(s=>s.halbjahr!==hj);
+  if(data.currentHalbjahr === hj) data.currentHalbjahr = data.halbjahre[0];
+  saveData();
+  renderSettings();
+}
+
+// ---------- Overlay helpers ----------
+function openOverlay(id){ document.getElementById(id).classList.add("active"); }
+function closeOverlay(id){ document.getElementById(id).classList.remove("active"); }
+document.querySelectorAll(".overlay").forEach(ov=>{
+  ov.addEventListener("click", (e)=>{ if(e.target===ov) ov.classList.remove("active"); });
+});
+
+// when opening "add" from dashboard with no subject selected in detail view,
+// the FAB should let user add either a subject (via long context) — simplified:
+// FAB always adds a grade; if no subjects exist yet it opens "add subject" first (handled above).
+
+function escapeHtml(str){
+  const d = document.createElement("div");
+  d.textContent = str;
+  return d.innerHTML;
+}
+
+// ---------- Init ----------
+renderDashboard();
+
+// ---------- Service worker registration ----------
+if("serviceWorker" in navigator){
+  window.addEventListener("load", ()=>{
+    navigator.serviceWorker.register("sw.js").catch(()=>{});
+  });
+}
+</script>
+</body>
+</html>
