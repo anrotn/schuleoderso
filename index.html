@@ -73,9 +73,9 @@
   }
   .hj-select option{ color:var(--ink); background: var(--paper-raised); }
 
- main{
+  main{
     flex:1;
-    padding: 10px 16px 180px; /* Hier von 90px auf 180px erhöht */
+    padding: 10px 16px 180px; /* Erhöht auf 180px, damit der FAB nichts verdeckt */
     position:relative;
     z-index:1;
   }
@@ -531,6 +531,15 @@
         </select>
       </div>
 
+      <div class="section-label">Daten sichern & übertragen</div>
+      <div class="settings-item" style="flex-direction: column; align-items: stretch; gap: 10px; padding: 16px;">
+        <p style="margin: 0 0 4px 0; font-size: 13px; color: var(--ink-soft); line-height: 1.4;">
+          Kopiere deine Daten als Textcode, um sie zu sichern, oder füge einen alten Code ein, um Noten wiederherzustellen.
+        </p>
+        <button class="btn ghost" onclick="exportData()" style="width: 100%; text-align: center; color: var(--ink);">📋 Daten kopieren</button>
+        <button class="btn ghost" onclick="importData()" style="width: 100%; text-align: center; border-color: var(--primary); color: var(--primary);">📥 Daten einfügen</button>
+      </div>
+
       <div class="section-label">Halbjahre verwalten</div>
       <div id="hjList"></div>
       <div class="add-row">
@@ -665,7 +674,7 @@ document.getElementById("hjSelect").addEventListener("change", (e)=>{
   renderDashboard();
 });
 
-// ---------- Views (Jetzt mit smarter FAB-Steuerung) ----------
+// ---------- Views ----------
 function showView(name){
   document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
   document.getElementById("view-"+name).classList.add("active");
@@ -673,16 +682,15 @@ function showView(name){
   const navBtn = document.querySelector(`nav.bottom button[data-tab="${name==='detail'?'dashboard':name}"]`);
   if(navBtn) navBtn.classList.add("active");
   
-  // Funktion des Plus-Buttons an die aktive Ansicht anpassen
   const fab = document.getElementById("fabAdd");
   if (name === "dashboard") {
     fab.style.display = "flex";
-    fab.onclick = openAddSubject; // Dashboard -> Fach hinzufügen
+    fab.onclick = openAddSubject;
   } else if (name === "detail") {
     fab.style.display = "flex";
-    fab.onclick = openAddGrade;   // Fach-Detail -> Note hinzufügen
+    fab.onclick = openAddGrade;
   } else {
-    fab.style.display = "none";   // In Abi & Settings ausblenden
+    fab.style.display = "none";
   }
   
   if(name==="dashboard") renderDashboard();
@@ -840,7 +848,7 @@ function toggleAbiExclusion(id) {
   }
 }
 
-// ---------- Detailansicht Untertrennung ----------
+// ---------- Detailansicht ----------
 function openDetail(id){
   currentSubjectId = id;
   const s = data.subjects.find(x=>x.id===id);
@@ -973,6 +981,41 @@ function saveSubject(){
   saveData();
   closeOverlay("overlaySubject");
   renderDashboard();
+}
+
+// ---------- Backup & Wiederherstellung Funktionen ----------
+function exportData() {
+  const rawData = localStorage.getItem(STORAGE_KEY);
+  if (!rawData || data.subjects.length === 0) {
+    alert("Du hast noch keine Noten oder Fächer eingetragen, die kopiert werden könnten!");
+    return;
+  }
+  navigator.clipboard.writeText(rawData).then(() => {
+    alert("Erfolgreich kopiert! Dein Noten-Code befindet sich in der Zwischenablage. Du kannst ihn jetzt als Backup sichern.");
+  }).catch(() => {
+    alert("Automatisches Kopieren fehlgeschlagen. Hier ist dein Code zum manuellen Kopieren:\n\n" + rawData);
+  });
+}
+
+function importData() {
+  const code = prompt("Füge hier den kopierten Backup-Code ein, um deine Daten wiederherzustellen:");
+  if (!code) return; // Abgebrochen
+  
+  try {
+    const parsed = JSON.parse(code);
+    if (!parsed.subjects || !parsed.halbjahre) {
+      throw new Error("Falsches Format");
+    }
+    
+    if (confirm("Möchtest du deine aktuellen Daten wirklich mit diesem Backup überschreiben?")) {
+      localStorage.setItem(STORAGE_KEY, code);
+      data = loadData(); // Daten neu einlesen
+      renderDashboard();
+      alert("Daten erfolgreich wiederhergestellt!");
+    }
+  } catch (e) {
+    alert("Fehler: Der eingegebene Code ist ungültig oder beschädigt.");
+  }
 }
 
 // ---------- Settings ----------
