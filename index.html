@@ -630,9 +630,26 @@ function subjectsForHj(hj){
 }
 function weightedAvg(grades){
   if(!grades.length) return null;
-  const totalW = grades.reduce((a,g)=>a+g.weight,0);
-  const totalP = grades.reduce((a,g)=>a+g.points*g.weight,0);
-  return totalP/totalW;
+  
+  const smallGrades = grades.filter(g => g.weight === 1);
+  const bigGrades = grades.filter(g => g.weight === 2);
+  
+  // Wenn in beiden Bereichen Noten existieren: 1:1 Verrechnung der Schnitte
+  if(smallGrades.length && bigGrades.length) {
+    const avgSmall = smallGrades.reduce((a,g)=>a+g.points,0) / smallGrades.length;
+    const avgBig = bigGrades.reduce((a,g)=>a+g.points,0) / bigGrades.length;
+    return (avgSmall + avgBig) / 2;
+  } 
+  // Falls es nur kleine Leistungsnachweise gibt
+  else if(smallGrades.length) {
+    return smallGrades.reduce((a,g)=>a+g.points,0) / smallGrades.length;
+  } 
+  // Falls es nur Klausuren gibt
+  else if(bigGrades.length) {
+    return bigGrades.reduce((a,g)=>a+g.points,0) / bigGrades.length;
+  }
+  
+  return null;
 }
 function tierClass(avg){
   if(avg===null) return "";
@@ -646,6 +663,60 @@ function renderDashboard(){
   renderHjSelect();
   const subs = subjectsForHj(data.currentHalbjahr);
   document.getElementById("hjTitle").textContent = data.currentHalbjahr;
+
+  const subjectAverages = subs
+    .map(s=>weightedAvg(s.grades))
+    .filter(a=>a!==null);
+  const overall = subjectAverages.length
+    ? subjectAverages.reduce((a,b)=>a+b,0)/subjectAverages.length
+    : null;
+
+  document.getElementById("overallScore").textContent = overall!==null ? overall.toFixed(1) : "–";
+  document.getElementById("hjSub").textContent = subs.length
+    ? `${subs.length} Fach${subs.length===1?"":"fächer"} · Ø aus allen Fächern`
+    : "Noch keine Fächer angelegt";
+
+  const list = document.getElementById("subjectList");
+  list.innerHTML = "";
+  if(!subs.length){
+    list.innerHTML = `<div class="empty"><span class="pen">✎</span>Noch keine Fächer für dieses Halbjahr.<br/>Tippe unten rechts auf + um eins hinzuzufügen.</div>`;
+    return;
+  }
+  
+  subs.forEach(s=>{
+    const avg = weightedAvg(s.grades);
+    
+    // Generiere die Noten-Reihe unter dem Fachnamen (sortiert nach Datum von alt nach neu)
+    let gradesHtml = "";
+    if(s.grades.length > 0) {
+      const sortedGrades = [...s.grades].sort((a,b)=>a.date - b.date);
+      gradesHtml = '<div class="mini-grades">';
+      sortedGrades.forEach(g => {
+        const isLow = g.points < 5 ? " low" : "";
+        if(g.weight === 2) {
+          gradesHtml += `<span class="mini-badge big${isLow}">${g.points}</span>`;
+        } else {
+          gradesHtml += `<span class="mini-badge small${isLow}">${g.points}</span>`;
+        }
+      });
+      gradesHtml += '</div>';
+    } else {
+      gradesHtml = `<div class="sub">Noch keine Noten eingetragen</div>`;
+    }
+
+    const row = document.createElement("div");
+    row.className = "subject-row " + tierClass(avg);
+    row.onclick = ()=> openDetail(s.id);
+    row.innerHTML = `
+      <div>
+        <div class="name">${escapeHtml(s.name)}</div>
+        ${gradesHtml}
+      </div>
+      <div class="pts">${avg!==null ? avg.toFixed(1) : "–"}</div>
+    `;
+    list.appendChild(row);
+  });
+}
 
   // overall average = mean of subject averages (each subject counts once)
   const subjectAverages = subs
@@ -700,20 +771,53 @@ function renderGradeList(s){
   list.innerHTML = "";
   if(!s.grades.length){ empty.style.display="block"; return; }
   empty.style.display = "none";
-  [...s.grades].sort((a,b)=>b.date-a.date).forEach(g=>{
-    const item = document.createElement("div");
-    item.className = "grade-item";
-    const d = new Date(g.date);
-    item.innerHTML = `
-      <div class="grade-circle">${g.points}</div>
-      <div class="grade-info">
-        <div class="typ">${g.weight===2?"Große Leistungserhebung":"Kleine Leistungserhebung"}${g.note ? " · "+escapeHtml(g.note) : ""}</div>
-        <div class="meta">${d.toLocaleDateString('de-DE')} · Gewichtung ×${g.weight}</div>
-      </div>
-      <button class="grade-del" onclick="deleteGrade('${g.id}')">✕</button>
-    `;
-    list.appendChild(item);
-  });
+
+  // Aufteilen in Große und Kleine Leistungsnachweise
+  const smallGrades = s.grades.filter(g => g.weight === 1).sort((a,b)=>b.date-a.date);
+  const bigGrades = s.grades.filter(g => g.weight === 2).sort((a,b)=>b.date-a.date);
+
+  // 1. Block: Große Leistungsnachweise (Klausuren)
+  if(bigGrades.length > 0) {
+    const header = document.createElement("div");
+    header.className = "section-label";
+    header.innerHTML = "<span>Große Leistungsnachweise (Klausuren)</span>";
+    list.appendChild(header);
+    
+    bigGrades.forEach(g => {
+      list.appendChild(createGradeItemNode(g));
+    });
+  }
+
+  // 2. Block: Kleine Leistungsnachweise
+  if(smallGrades.length > 0) {
+    const header = document.createElement("div");
+    header.className = "section-label";
+    header.innerHTML = "<span>Kleine Leistungsnachweise</span>";
+    list.appendChild(header);
+    
+    smallGrades.forEach(g => {
+      list.appendChild(createGradeItemNode(g));
+    });
+  }
+}
+
+// Hilfsfunktion zum Erstellen eines Listeneintrags
+function createGradeItemNode(g) {
+  const item = document.createElement("div");
+  item.className = "grade-item";
+  const d = new Date(g.date);
+  const circleColor = g.points < 5 ? "var(--red)" : "var(--primary)";
+  
+  item.innerHTML = `
+    <div class="grade-circle" style="border-color: ${circleColor}; color: ${circleColor};">${g.points}</div>
+    <div class="grade-info">
+      <div class="typ">${g.note ? escapeHtml(g.note) : (g.weight===2 ? "Klausur" : "Leistungsnachweis")}</div>
+      <div class="meta">${d.toLocaleDateString('de-DE')}</div>
+    </div>
+    <button class="grade-del" onclick="deleteGrade('${g.id}')">✕</button>
+  `;
+  return item;
+});
 }
 function deleteCurrentSubject(){
   if(!currentSubjectId) return;
