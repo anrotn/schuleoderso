@@ -2,8 +2,8 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8" />
-<!-- NACHHER -->
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" /><meta name="theme-color" content="#141416" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta name="theme-color" content="#141416" />
 <title>Punkteschnitt – Notenverwaltung</title>
 <link rel="manifest" href="manifest.json" />
 <link rel="icon" href="icon-192.png" />
@@ -25,17 +25,16 @@
     --shadow: 0 4px 16px rgba(0,0,0,0.4);
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
- /* NACHHER (Einfach komplett hiermit ersetzen) */
-html,body{
-  margin:0; 
-  padding:0; 
-  height:100%; 
-  background: var(--paper);
-  width: 100%;
-  max-width: 100%;
-  overflow-x: hidden;          /* Verhindert horizontales Scrollen */
-  overscroll-behavior-x: none; /* Blockiert den iOS-Wackeleffekt nach links/rechts */
-}
+  html,body{
+    margin:0; 
+    padding:0; 
+    height:100%; 
+    background: var(--paper);
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;          /* Verhindert horizontales Scrollen */
+    overscroll-behavior-x: none; /* Blockiert den iOS-Wackeleffekt nach links/rechts */
+  }
   body{
     color:var(--ink);
     font-family:'Source Sans 3', sans-serif;
@@ -332,7 +331,6 @@ html,body{
   }
   .grade-info{ flex:1; min-width:0; }
   .grade-info .typ{ font-weight:600; font-size:14px; }
-  .grade-info .meta( font-size:12px; color:var(--ink-soft); margin-top:2px; )
   .grade-del{
     background:none; border:none; color:var(--ink-soft); font-size:16px; padding:4px 8px;
   }
@@ -495,7 +493,7 @@ html,body{
       </div>
 
       <div class="section-label">
-        <span>Fächer</span>
+        <span>Fächer (nach Note sortiert)</span>
       </div>
       <div id="subjectList"></div>
     </section>
@@ -554,7 +552,6 @@ html,body{
         <button class="btn ghost" onclick="importData()" style="width: 100%; text-align: center; border-color: var(--primary); color: var(--primary);">📥 Daten einfügen</button>
       </div>
 
-      <!-- HALBJAHRE VERWALTEN INKL. NEUEM KOPIER-BUTTON -->
       <div class="section-label">Halbjahre verwalten</div>
       <div id="hjList"></div>
       <div class="add-row">
@@ -737,7 +734,18 @@ function subjectsForHj(hj){ return data.subjects.filter(s=>s.halbjahr===hj); }
 
 function renderDashboard(){
   renderHjSelect();
-  const subs = subjectsForHj(data.currentHalbjahr);
+  let subs = subjectsForHj(data.currentHalbjahr);
+
+  // NEU: Fächer nach Schnitt sortieren (Beste zuerst, Unbenotete nach ganz unten)
+  subs.sort((a, b) => {
+    const avgA = weightedAvg(a.grades);
+    const avgB = weightedAvg(b.grades);
+    if (avgA === null && avgB === null) return 0;
+    if (avgA === null) return 1;
+    if (avgB === null) return -1;
+    return avgB - avgA; // Höhere Punktzahl nach oben
+  });
+
   document.getElementById("hjTitle").textContent = data.currentHalbjahr;
 
   const subjectAverages = subs.map(s=>weightedAvg(s.grades)).filter(a=>a!==null);
@@ -976,6 +984,7 @@ function saveGrade(){
   openDetail(currentSubjectId);
 }
 
+// Dialoge öffnen / schließen
 function openAddSubject(){
   document.getElementById("subjectNameInput").value = "";
   openOverlay("overlaySubject");
@@ -1019,32 +1028,25 @@ function importData() {
   }
 }
 
-// NEUE LOGIK: Fächer auf alle anderen Halbjahre duplizieren
 function copySubjectsToAllHj() {
   const currentHj = data.currentHalbjahr;
   const currentSubs = data.subjects.filter(s => s.halbjahr === currentHj);
-  
   if (currentSubs.length === 0) {
     alert(`Im aktuell ausgewählten Halbjahr (${currentHj}) existieren noch keine Fächer, die übertragen werden könnten.`);
     return;
   }
-
   const confirmMsg = `Möchtest du die Fächer aus "${currentHj}" in ALLE anderen Halbjahre kopieren?\n\nBereits existierende Fächer in den Ziel-Halbjahren werden ignoriert (keine Duplikate). Noten werden natürlich NICHT mitkopiert.`;
   if (!confirm(confirmMsg)) return;
 
   let addedCount = 0;
-
   data.halbjahre.forEach(targetHj => {
-    if (targetHj === currentHj) return; // Überspringe das Quell-Halbjahr
-
-    // Fächer holen, die im Ziel-Halbjahr schon existieren (für den Duplikat-Check)
+    if (targetHj === currentHj) return;
     const existingNames = data.subjects
       .filter(s => s.halbjahr === targetHj)
       .map(s => s.name.toLowerCase().trim());
 
     currentSubs.forEach(sourceSub => {
       const cleanName = sourceSub.name.trim();
-      // Falls das Fach im Ziel-Halbjahr noch nicht existiert -> anlegen
       if (!existingNames.includes(cleanName.toLowerCase())) {
         data.subjects.push({
           id: uid(),
@@ -1057,7 +1059,6 @@ function copySubjectsToAllHj() {
       }
     });
   });
-
   saveData();
   alert(`Erfolgreich durchgeführt! Es wurden insgesamt ${addedCount} Fächer in den anderen Halbjahren angelegt.`);
   renderSettings();
