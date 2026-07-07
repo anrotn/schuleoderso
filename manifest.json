@@ -8,8 +8,10 @@
   "background_color": "#141416",
   "theme_color": "#141416",
   "orientation": "portrait",
-  "icons": [
-    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
-    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
-  ]
-}
+ "icons": [
+    {
+      "src": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='42' fill='%23141416'/><path d='M96 45 L155 75 L96 105 L37 75 Z' fill='%2366BB6A'/><path d='M58 92 L58 130 C 58 142, 134 142, 134 130 L134 92' fill='none' stroke='%2366BB6A' stroke-width='8' stroke-linecap='round'/><path d='M135 77 L150 115 L155 115 L155 77' fill='none' stroke='%2366BB6A' stroke-width='4' stroke-linecap='round'/><circle cx='152.5' cy='117' r='4' fill='%2366BB6A'/></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    }
+  ],
