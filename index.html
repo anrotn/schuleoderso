@@ -162,6 +162,37 @@
   }
   .subject-row .name{ font-weight:600; font-size:16px; letter-spacing: -0.01em; }
   .subject-row .sub{ font-size:13px; color:var(--ink-soft); margin-top:3px; }
+ /* Notan-Style Notenliste unter dem Fachnamen */
+  .mini-grades {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 6px;
+    flex-wrap: wrap;
+  }
+  .mini-badge {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+  }
+  /* Kleine Leistungsnachweise: Reine Textfarbe */
+  .mini-badge.small {
+    color: var(--primary);
+  }
+  .mini-badge.small.low {
+    color: var(--red);
+  }
+  /* Große Leistungsnachweise (Klausuren): Fester Block wie im Screenshot */
+  .mini-badge.big {
+    background: var(--primary);
+    color: #141416;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+  }
+  .mini-badge.big.low {
+    background: var(--red);
+  }
   
   /* Die runden Noten-Kreise rechts */
   .subject-row .pts{
